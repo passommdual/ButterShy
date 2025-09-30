@@ -39,7 +39,7 @@ class SpeciesCatalogFragment : Fragment() {
             showButterflyInfo(butterfly)
         }
 
-        binding.butterflyRecyclerView.layoutManager = GridLayoutManager(context, 4)
+        binding.butterflyRecyclerView.layoutManager = GridLayoutManager(context, 3)
         binding.butterflyRecyclerView.adapter = adapter
     }
 
