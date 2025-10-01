@@ -73,6 +73,12 @@ class SpeciesCatalogFragment : Fragment() {
                     )
                 }
                 .setNegativeButton("Cancel", null)
+                .setNeutralButton("Reset") { _, _ ->
+                    // Filter zurücksetzen
+                    selectedItems.clear()
+                    viewModel.filterButterflies(emptyList(), false)
+                    binding.speciesFilterDropdown.setText("Select species...", false)
+                }
                 .show()
         }
     }
