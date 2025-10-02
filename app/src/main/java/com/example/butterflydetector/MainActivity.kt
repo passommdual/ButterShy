@@ -1,5 +1,6 @@
 package com.example.butterflydetector
 
+import android.content.Context
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
@@ -15,6 +16,14 @@ import androidx.drawerlayout.widget.DrawerLayout
 import androidx.appcompat.app.AppCompatActivity
 import com.example.butterflydetector.databinding.ActivityMainBinding
 import com.example.butterflydetector.ui.home.HomeFragment
+import com.example.butterflydetector.data.ButterflyDatabase
+import com.example.butterflydetector.data.ButterflyEntity
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import org.json.JSONArray
+import java.io.IOException
 
 class MainActivity : AppCompatActivity() {
 
@@ -22,6 +31,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        println("DEBUG: MainActivity onCreate reached")
+
         super.onCreate(savedInstanceState)
 
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -29,12 +40,13 @@ class MainActivity : AppCompatActivity() {
 
         setSupportActionBar(binding.appBarMain.toolbar)
 
+        initializeDatabase()
+
         val drawerLayout: DrawerLayout = binding.drawerLayout
         val navView: NavigationView = binding.navView
         val navController = findNavController(R.id.nav_host_fragment_content_main)
 
-        // Passing each menu ID as a set of Ids because each
-        // menu should be considered as top level destinations.
+
         appBarConfiguration = AppBarConfiguration(
             setOf(
                 R.id.nav_home, R.id.nav_photoselection, R.id.nav_speciescatalog, R.id.nav_transects, R.id.nav_transectwalks
@@ -43,7 +55,6 @@ class MainActivity : AppCompatActivity() {
         setupActionBarWithNavController(navController, appBarConfiguration)
 
         navController.addOnDestinationChangedListener { _, destination, _ ->
-            // Update drawer menu selection based on current destination
             val menuItem = when (destination.id) {
                 R.id.nav_home -> navView.menu.findItem(R.id.nav_home)
                 R.id.nav_photoselection -> navView.menu.findItem(R.id.nav_photoselection)
@@ -53,16 +64,13 @@ class MainActivity : AppCompatActivity() {
                 else -> null
             }
 
-            // Clear all selections first
             for (i in 0 until navView.menu.size()) {
                 navView.menu.getItem(i).isChecked = false
             }
 
-            // Set the current destination as checked
             menuItem?.isChecked = true
         }
 
-        // Custom navigation item selection listener
         navView.setNavigationItemSelectedListener { menuItem ->
             when (menuItem.itemId) {
                 R.id.nav_home -> {
@@ -97,13 +105,72 @@ class MainActivity : AppCompatActivity() {
         setupBottomNavigation(navController)
     }
 
+    private fun initializeDatabase() {
+        val sharedPrefs = getSharedPreferences("ButterflyApp", Context.MODE_PRIVATE)
+        val isFirstLaunch = sharedPrefs.getBoolean("isFirstLaunch", true)
+
+        if (isFirstLaunch) {
+            CoroutineScope(Dispatchers.IO).launch {
+                try {
+                    val butterflies = loadButterfliesFromJson()
+                    val database = ButterflyDatabase.getDatabase(applicationContext)
+                    database.butterflyDao().insertAll(butterflies)
+
+                    sharedPrefs.edit().putBoolean("isFirstLaunch", false).apply()
+
+                    withContext(Dispatchers.Main) {
+                        Toast.makeText(
+                            this@MainActivity,
+                            "Butterfly database initialized with ${butterflies.size} species",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    withContext(Dispatchers.Main) {
+                        Toast.makeText(
+                            this@MainActivity,
+                            "Error loading butterfly data: ${e.message}",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
+                }
+            }
+        }
+    }
+
+    private fun loadButterfliesFromJson(): List<ButterflyEntity> {
+        val butterflies = mutableListOf<ButterflyEntity>()
+        try {
+            val jsonString = assets.open("butterflies.json").bufferedReader().use { it.readText() }
+            val jsonArray = JSONArray(jsonString)
+
+            for (i in 0 until jsonArray.length()) {
+                val jsonObject = jsonArray.getJSONObject(i)
+                val butterfly = ButterflyEntity(
+                    id = jsonObject.getInt("id"),
+                    name = jsonObject.getString("name"),
+                    species = jsonObject.getString("species"),
+                    imageFile = jsonObject.getString("imageFile"),
+                    description = jsonObject.getString("description"),
+                    habitat = jsonObject.getString("habitat"),
+                    wingspan = jsonObject.getString("wingspan"),
+                    flightPeriod = jsonObject.getString("flightPeriod"),
+                    isFavorite = jsonObject.optBoolean("isFavorite", false)
+                )
+                butterflies.add(butterfly)
+            }
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
+        return butterflies
+    }
+
     private fun setupBottomNavigation(navController: androidx.navigation.NavController) {
-        // Find bottom navigation buttons
         val photoselectionBtn = findViewById<LinearLayout>(R.id.btn_photoselection)
         val cameraBtn = findViewById<LinearLayout>(R.id.btn_camera)
         val transectsBtn = findViewById<LinearLayout>(R.id.btn_transects)
 
-        // Set click listeners for bottom navigation
         photoselectionBtn?.setOnClickListener {
             getCurrentHomeFragment()?.stopPhotoCapture()
             navController.navigate(R.id.nav_photoselection)
@@ -114,7 +181,6 @@ class MainActivity : AppCompatActivity() {
             if (currentFragment != null) {
                 currentFragment.captureAdditionalPhoto()
             } else {
-                // Navigate to home if not already there
                 navController.navigate(R.id.nav_home)
             }
         }

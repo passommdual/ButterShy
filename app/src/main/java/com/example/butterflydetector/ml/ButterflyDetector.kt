@@ -22,7 +22,7 @@ class ButterflyDetector private constructor(private val context: Context) {
         private const val TAG = "ButterflyDetector"
         private const val MODEL_NAME = "butterfly_model.onnx"
         private const val INPUT_SIZE = 224
-        private const val DETECTION_THRESHOLD = 0.85f // Adjust based on your training
+        private const val DETECTION_THRESHOLD = 0.85f
         @Volatile
         private var INSTANCE: ButterflyDetector? = null
 

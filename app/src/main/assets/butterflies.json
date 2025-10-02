@@ -1,0 +1,112 @@
+[
+  {
+    "id": 0,
+    "name": "Abaeis nicippe",
+    "species": "Pieridae",
+    "imageFile": "butterfly_abaeis_nicippe.jpg",
+    "description": "White, yellow, or orange butterflies, many are migratory.",
+    "habitat": "Open areas, fields, and meadows",
+    "wingspan": "3.0-6.5 cm",
+    "flightPeriod": "March to November",
+    "isFavorite": false
+  },
+  {
+    "id": 1,
+    "name": "Acraea horta",
+    "species": "Nymphalidae",
+    "imageFile": "butterfly_acraea_horta.jpg",
+    "description": "Brush-footed butterflies, diverse in size and pattern.",
+    "habitat": "Woodlands, gardens, and open fields",
+    "wingspan": "4.0-8.0 cm",
+    "flightPeriod": "March to October",
+    "isFavorite": false
+  },
+  {
+    "id": 2,
+    "name": "Acraea terpsicore",
+    "species": "Nymphalidae",
+    "imageFile": "butterfly_acraea_terpsicore.jpg",
+    "description": "Brush-footed butterflies, diverse in size and pattern.",
+    "habitat": "Woodlands, gardens, and open fields",
+    "wingspan": "4.0-8.0 cm",
+    "flightPeriod": "March to October",
+    "isFavorite": false
+  },
+  {
+    "id": 3,
+    "name": "Adelpha californica",
+    "species": "Nymphalidae",
+    "imageFile": "butterfly_adelpha_californica.jpg",
+    "description": "Brush-footed butterflies, diverse in size and pattern.",
+    "habitat": "Woodlands, gardens, and open fields",
+    "wingspan": "4.0-8.0 cm",
+    "flightPeriod": "March to October",
+    "isFavorite": false
+  },
+  {
+    "id": 4,
+    "name": "Adelpha eulalia",
+    "species": "Nymphalidae",
+    "imageFile": "butterfly_adelpha_eulalia.jpg",
+    "description": "Brush-footed butterflies, diverse in size and pattern.",
+    "habitat": "Woodlands, gardens, and open fields",
+    "wingspan": "4.0-8.0 cm",
+    "flightPeriod": "March to October",
+    "isFavorite": false
+  },
+  {
+    "id": 5,
+    "name": "Aglais io",
+    "species": "Nymphalidae",
+    "imageFile": "butterfly_aglais_io.jpg",
+    "description": "Brush-footed butterflies, diverse in size and pattern.",
+    "habitat": "Woodlands, gardens, and open fields",
+    "wingspan": "4.0-8.0 cm",
+    "flightPeriod": "March to October",
+    "isFavorite": false
+  },
+  {
+    "id": 6,
+    "name": "Aglais milberti",
+    "species": "Nymphalidae",
+    "imageFile": "butterfly_aglais_milberti.jpg",
+    "description": "Brush-footed butterflies, diverse in size and pattern.",
+    "habitat": "Woodlands, gardens, and open fields",
+    "wingspan": "4.0-8.0 cm",
+    "flightPeriod": "March to October",
+    "isFavorite": false
+  },
+  {
+    "id": 7,
+    "name": "Aglais urticae",
+    "species": "Nymphalidae",
+    "imageFile": "butterfly_aglais_urticae.jpg",
+    "description": "Brush-footed butterflies, diverse in size and pattern.",
+    "habitat": "Woodlands, gardens, and open fields",
+    "wingspan": "4.0-8.0 cm",
+    "flightPeriod": "March to October",
+    "isFavorite": false
+  },
+  {
+    "id": 8,
+    "name": "Amarynthis meneria",
+    "species": "Nymphalidae",
+    "imageFile": "butterfly_amarynthis_meneria.jpg",
+    "description": "Brush-footed butterflies, diverse in size and pattern.",
+    "habitat": "Woodlands, gardens, and open fields",
+    "wingspan": "4.0-8.0 cm",
+    "flightPeriod": "March to October",
+    "isFavorite": false
+  },
+  {
+    "id": 9,
+    "name": "Anaea aidea",
+    "species": "Nymphalidae",
+    "imageFile": "butterfly_anaea_aidea.jpg",
+    "description": "Brush-footed butterflies, diverse in size and pattern.",
+    "habitat": "Woodlands, gardens, and open fields",
+    "wingspan": "4.0-8.0 cm",
+    "flightPeriod": "March to October",
+    "isFavorite": false
+  }
+]
