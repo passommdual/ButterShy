@@ -1,6 +1,6 @@
 package com.example.butterflydetector.ui.speciescatalog
 
-import android.graphics.BitmapFactory
+import android.graphics.Color
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -35,29 +35,40 @@ class ButterflyAdapter(
 
         fun bind(butterfly: ButterflyEntity) {
             val context = itemView.context
-            val assetManager = context.assets
-            val filename = butterfly.imageFile
 
-            try {
-                assetManager.open(filename).use { inputStream ->
-                    val bitmap = BitmapFactory.decodeStream(inputStream)
-                    imageView.setImageBitmap(bitmap)
-                    imageView.alpha = 1f
-                }
-            } catch (e: Exception) {
-                // Fallback image if asset not found
+            // Remove file extension if present (e.g., "butterfly_name.jpg" -> "butterfly_name")
+            val resourceName = butterfly.imageFile.substringBeforeLast(".")
+
+            // Get drawable resource ID by name
+            val drawableId = context.resources.getIdentifier(
+                resourceName,
+                "drawable",
+                context.packageName
+            )
+
+            if (drawableId != 0) {
+                // Successfully found the drawable resource
+                imageView.setImageResource(drawableId)
+                imageView.alpha = 1f
+            } else {
+                // Fallback image if drawable not found
                 imageView.setImageResource(android.R.drawable.ic_menu_gallery)
                 imageView.alpha = 0.5f
                 Log.w(
                     "ButterflyAdapter",
-                    "Could not load asset image: $filename. Available assets: ${assetManager.list("")?.joinToString(", ")}"
+                    "Could not load drawable resource: $resourceName (from imageFile: ${butterfly.imageFile})"
                 )
             }
 
-            // Set favorite icon
             favoriteButton.setImageResource(
                 if (butterfly.isFavorite) android.R.drawable.star_big_on
                 else android.R.drawable.star_big_off
+            )
+
+            // Set tint color: yellow when favorite, grey when not
+            favoriteButton.setColorFilter(
+                if (butterfly.isFavorite) Color.parseColor("#FFEB3B") // Yellow
+                else Color.parseColor("#AAAAAA") // Grey
             )
 
             // Click listeners

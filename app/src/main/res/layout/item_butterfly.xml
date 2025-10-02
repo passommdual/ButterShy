@@ -47,7 +47,7 @@
             android:layout_width="match_parent"
             android:layout_height="45dp">
 
-<ImageButton                android:id="@+id/favorite_button"
+            <ImageButton                android:id="@+id/favorite_button"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
                 app:backgroundTint="@android:color/white"
@@ -56,7 +56,7 @@
                 app:srcCompat="@drawable/ic_star_border"
                 app:tint="#AAAAAA" />
 
-<ImageButton                android:id="@+id/info_button"
+            <ImageButton                android:id="@+id/info_button"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
                 android:layout_gravity="top|end"
