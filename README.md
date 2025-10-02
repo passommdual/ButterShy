@@ -24,11 +24,10 @@ Android App zur Unterstützung der Datensammlung von Schmetterlingssichtungen f�
 ### Pascal
 
 - Persistente Favoriten DONE
-- Fix der Buttons (Burgermenu hat zu viele Optionen, Klick auf Camera startet aktuell
-  nicht automatisch die Bildaufnahme, wenn zuvor auf anderem Screen)
-- Homescreen Name change
-- Disablen der Zählfunktion/Des Toggles im Homescreen
-- ReadMe aufräumen
+- Fix der Buttons (Burgermenu hat zu viele Optionen)
+- Homescreen Name change DONE
+- Disablen der Zählfunktion/Des Toggles im Homescreen DONE
+- ReadMe aufräumen DONE
 
 
 ## Features
@@ -53,14 +52,14 @@ Android App zur Unterstützung der Datensammlung von Schmetterlingssichtungen f�
 - **develop**
   - every feature branch should originate from develop
 
-### feature/base-structure
+### Basisstruktur
 
 - **feature/base-structure**
   - the base structure of the app
   - no real functionality
   - starting point of development
 
-### prototype
+### Prototyp/MVP
 
 - **prototype**
   - MVP for marketplace presentation
@@ -72,4 +71,4 @@ Android App zur Unterstützung der Datensammlung von Schmetterlingssichtungen f�
 ## Logging von Ergebnissen
 
 - **tag:HomeFragment level:debug tag:HomeFragment level:debug**
-  - zeigt ob Butterfly detectedf wurde und mit welcher Wahrscheinlichkeit und History
+  - zeigt ob Butterfly detected wurde und mit welcher Wahrscheinlichkeit und History

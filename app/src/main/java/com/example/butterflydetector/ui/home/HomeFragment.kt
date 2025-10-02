@@ -25,6 +25,7 @@ import kotlinx.coroutines.launch
 import java.io.File
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
+import androidx.core.graphics.createBitmap
 
 class HomeFragment : Fragment() {
 
@@ -149,7 +150,6 @@ class HomeFragment : Fragment() {
             val bitmap = imageProxyToBitmap(imageProxy)
             lifecycleScope.launch {
                 try {
-                    // Simple binary detection with history smoothing
                     if (detectionHistory.size >= HISTORY_SIZE) detectionHistory.removeFirst()
                     detectionHistory.addLast(butterflyDetector.detectButterfly(bitmap))
 
@@ -178,11 +178,7 @@ class HomeFragment : Fragment() {
         buffer.rewind()
         val bytes = ByteArray(buffer.remaining())
         buffer.get(bytes)
-        return Bitmap.createBitmap(
-            imageProxy.width,
-            imageProxy.height,
-            Bitmap.Config.ARGB_8888
-        ).also { bitmap ->
+        return createBitmap(imageProxy.width, imageProxy.height).also { bitmap ->
             bitmap.copyPixelsFromBuffer(java.nio.ByteBuffer.wrap(bytes))
         }
     }
