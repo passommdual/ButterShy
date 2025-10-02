@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.ImageView
+import android.widget.TextView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -30,11 +31,13 @@ class ButterflyAdapter(
 
     inner class ButterflyViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val imageView: ImageView = itemView.findViewById(R.id.butterfly_image)
+        private val nameTextView: TextView = itemView.findViewById(R.id.butterfly_name)
         private val infoButton: ImageButton = itemView.findViewById(R.id.info_button)
         private val favoriteButton: ImageButton = itemView.findViewById(R.id.favorite_button)
 
         fun bind(butterfly: ButterflyEntity) {
             val context = itemView.context
+            nameTextView.text = butterfly.name
 
             // Remove file extension if present (e.g., "butterfly_name.jpg" -> "butterfly_name")
             val resourceName = butterfly.imageFile.substringBeforeLast(".")
