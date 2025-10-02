@@ -23,7 +23,7 @@ Android App zur Unterst√ºtzung der Datensammlung von Schmetterlingssichtungen f√
 
 ### Pascal
 
-- Persistente Favoriten
+- Persistente Favoriten DONE
 - Fix der Buttons (Burgermenu hat zu viele Optionen, Klick auf Camera startet aktuell
   nicht automatisch die Bildaufnahme, wenn zuvor auf anderem Screen)
 - Homescreen Name change

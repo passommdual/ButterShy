@@ -18,9 +18,6 @@ class HomeViewModel : ViewModel() {
     private val _photoCount = MutableLiveData<Int>().apply { value = 0 }
     val photoCount: LiveData<Int> = _photoCount
 
-    private val _butterflyCount = MutableLiveData<Int>().apply { value = 0 }
-    val butterflyCount: LiveData<Int> = _butterflyCount
-
     private val _detectionStatus = MutableLiveData<String>().apply { value = "Detection: Ready" }
     val detectionStatus: LiveData<String> = _detectionStatus
 
@@ -40,10 +37,6 @@ class HomeViewModel : ViewModel() {
     fun addPhoto(bitmap: Bitmap) {
         _capturedPhotos.add(bitmap)
         _photoCount.value = _capturedPhotos.size
-    }
-
-    fun updateButterflyCount(count: Int) {
-        _butterflyCount.value = count
     }
 
     fun updateDetectionStatus(status: String) {

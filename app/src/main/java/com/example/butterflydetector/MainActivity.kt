@@ -49,14 +49,14 @@ class MainActivity : AppCompatActivity() {
 
         appBarConfiguration = AppBarConfiguration(
             setOf(
-                R.id.nav_home, R.id.nav_photoselection, R.id.nav_speciescatalog, R.id.nav_transects, R.id.nav_transectwalks
+                R.id.nav_camera, R.id.nav_photoselection, R.id.nav_speciescatalog, R.id.nav_transects, R.id.nav_transectwalks
             ), drawerLayout
         )
         setupActionBarWithNavController(navController, appBarConfiguration)
 
         navController.addOnDestinationChangedListener { _, destination, _ ->
             val menuItem = when (destination.id) {
-                R.id.nav_home -> navView.menu.findItem(R.id.nav_home)
+                R.id.nav_camera -> navView.menu.findItem(R.id.nav_camera)
                 R.id.nav_photoselection -> navView.menu.findItem(R.id.nav_photoselection)
                 R.id.nav_speciescatalog -> navView.menu.findItem(R.id.nav_speciescatalog)
                 R.id.nav_transects -> navView.menu.findItem(R.id.nav_transects)
@@ -73,8 +73,8 @@ class MainActivity : AppCompatActivity() {
 
         navView.setNavigationItemSelectedListener { menuItem ->
             when (menuItem.itemId) {
-                R.id.nav_home -> {
-                    navController.navigate(R.id.nav_home)
+                R.id.nav_camera -> {
+                    navController.navigate(R.id.nav_camera)
                     drawerLayout.closeDrawers()
                     true
                 }
@@ -181,7 +181,7 @@ class MainActivity : AppCompatActivity() {
             if (currentFragment != null) {
                 currentFragment.captureAdditionalPhoto()
             } else {
-                navController.navigate(R.id.nav_home)
+                navController.navigate(R.id.nav_camera)
             }
         }
 
