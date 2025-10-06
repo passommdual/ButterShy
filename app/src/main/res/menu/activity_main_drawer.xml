@@ -24,6 +24,11 @@
             android:id="@+id/nav_transectwalks"
             android:icon="@drawable/ic_menu_transectwalks"
             android:title="@string/menu_transectwalks" />
+        <item
+            android:id="@+id/nav_tutorial"
+            android:title="Tutorial"
+            android:icon="@drawable/ic_help" />
+
     </group>
 
 
