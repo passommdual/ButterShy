@@ -24,93 +24,96 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
+        setSupportActionBar(binding.appBarMain.toolbar)
 
-            tutorialFirstStart()
-            val drawerLayout: DrawerLayout = binding.drawerLayout
-            val navView: NavigationView = binding.navView
-            val navController = findNavController(R.id.nav_host_fragment_content_main)
+        //tutorialFirstStart()
 
-            // Passing each menu ID as a set of Ids because each
-            // menu should be considered as top level destinations.
-            appBarConfiguration = AppBarConfiguration(
-                setOf(
-                    R.id.nav_home,
-                    R.id.nav_photoselection,
-                    R.id.nav_speciescatalog,
-                    R.id.nav_transects,
-                    R.id.nav_transectwalks
-                ), drawerLayout
-            )
-            setupActionBarWithNavController(navController, appBarConfiguration)
+        val drawerLayout: DrawerLayout = binding.drawerLayout
+        val navView: NavigationView = binding.navView
+        val navController = findNavController(R.id.nav_host_fragment_content_main)
 
-            navController.addOnDestinationChangedListener { _, destination, _ ->
-                // Update drawer menu selection based on current destination
-                val menuItem = when (destination.id) {
-                    R.id.nav_home -> navView.menu.findItem(R.id.nav_home)
-                    R.id.nav_photoselection -> navView.menu.findItem(R.id.nav_photoselection)
-                    R.id.nav_speciescatalog -> navView.menu.findItem(R.id.nav_speciescatalog)
-                    R.id.nav_transects -> navView.menu.findItem(R.id.nav_transects)
-                    R.id.nav_transectwalks -> navView.menu.findItem(R.id.nav_transectwalks)
-                    R.id.nav_tutorial -> navView.menu.findItem(R.id.nav_tutorial)
-                    else -> null
-                }
+        // Passing each menu ID as a set of Ids because each
+        // menu should be considered as top level destinations.
+        appBarConfiguration = AppBarConfiguration(
+            setOf(
+                R.id.nav_home,
+                R.id.nav_photoselection,
+                R.id.nav_speciescatalog,
+                R.id.nav_transects,
+                R.id.nav_transectwalks
+            ), drawerLayout
+        )
+        setupActionBarWithNavController(navController, appBarConfiguration)
 
-                // Clear all selections first
-                for (i in 0 until navView.menu.size()) {
-                    navView.menu.getItem(i).isChecked = false
-                }
-
-                // Set the current destination as checked
-                menuItem?.isChecked = true
+        navController.addOnDestinationChangedListener { _, destination, _ ->
+            // Update drawer menu selection based on current destination
+            val menuItem = when (destination.id) {
+                R.id.nav_home -> navView.menu.findItem(R.id.nav_home)
+                R.id.nav_photoselection -> navView.menu.findItem(R.id.nav_photoselection)
+                R.id.nav_speciescatalog -> navView.menu.findItem(R.id.nav_speciescatalog)
+                R.id.nav_transects -> navView.menu.findItem(R.id.nav_transects)
+                R.id.nav_transectwalks -> navView.menu.findItem(R.id.nav_transectwalks)
+                R.id.nav_tutorial -> navView.menu.findItem(R.id.nav_tutorial)
+                else -> null
             }
 
-            // Custom navigation item selection listener
-            navView.setNavigationItemSelectedListener { menuItem ->
-                when (menuItem.itemId) {
-                    R.id.nav_home -> {
-                        navController.navigate(R.id.nav_home)
-                        drawerLayout.closeDrawers()
-                        true
-                    }
-
-                    R.id.nav_photoselection -> {
-                        navController.navigate(R.id.nav_photoselection)
-                        drawerLayout.closeDrawers()
-                        true
-                    }
-
-                    R.id.nav_speciescatalog -> {
-                        navController.navigate(R.id.nav_speciescatalog)
-                        drawerLayout.closeDrawers()
-                        true
-                    }
-
-                    R.id.nav_transects -> {
-                        navController.navigate(R.id.nav_transects)
-                        drawerLayout.closeDrawers()
-                        true
-                    }
-
-                    R.id.nav_transectwalks -> {
-                        navController.navigate(R.id.nav_transectwalks)
-                        drawerLayout.closeDrawers()
-                        true
-                    }
-
-                    R.id.nav_tutorial -> {
-                        navController.navigate(R.id.nav_tutorial)
-                        drawerLayout.closeDrawers()
-                        true
-                    }
-
-                    else -> false
-                }
+            // Clear all selections first
+            for (i in 0 until navView.menu.size()) {
+                navView.menu.getItem(i).isChecked = false
             }
 
-            setupBottomNavigation(navController)
+            // Set the current destination as checked
+            menuItem?.isChecked = true
         }
+
+        // Custom navigation item selection listener
+        navView.setNavigationItemSelectedListener { menuItem ->
+            when (menuItem.itemId) {
+                R.id.nav_home -> {
+                    navController.navigate(R.id.nav_home)
+                    drawerLayout.closeDrawers()
+                    true
+                }
+
+                R.id.nav_photoselection -> {
+                    navController.navigate(R.id.nav_photoselection)
+                    drawerLayout.closeDrawers()
+                    true
+                }
+
+                R.id.nav_speciescatalog -> {
+                    navController.navigate(R.id.nav_speciescatalog)
+                    drawerLayout.closeDrawers()
+                    true
+                }
+
+                R.id.nav_transects -> {
+                    navController.navigate(R.id.nav_transects)
+                    drawerLayout.closeDrawers()
+                    true
+                }
+
+                R.id.nav_transectwalks -> {
+                    navController.navigate(R.id.nav_transectwalks)
+                    drawerLayout.closeDrawers()
+                    true
+                }
+
+                R.id.nav_tutorial -> {
+                    navController.navigate(R.id.nav_tutorial)
+                    drawerLayout.closeDrawers()
+                    true
+                }
+
+                else -> false
+            }
+        }
+
+        setupBottomNavigation(navController)
+    }
 
     private fun tutorialFirstStart() {
 
@@ -128,9 +131,6 @@ class MainActivity : AppCompatActivity() {
             setSupportActionBar(binding.appBarMain.toolbar)
         }
     }
-
-
-
 
     private fun setupBottomNavigation(navController: androidx.navigation.NavController) {
         // Find bottom navigation buttons
