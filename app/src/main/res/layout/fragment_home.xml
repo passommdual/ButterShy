@@ -16,18 +16,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- Grid overlay for counting -->
-    <com.example.butterflydetector.ui.home.GridOverlayView
-        android:id="@+id/grid_overlay"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:visibility="gone"
-        app:layout_constraintTop_toTopOf="parent"
-        android:layout_marginTop="?attr/actionBarSize"
-        app:layout_constraintBottom_toTopOf="@+id/status_container"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
-
     <!-- Status container -->
     <LinearLayout
         android:id="@+id/status_container"
@@ -38,25 +26,13 @@
         android:background="@color/logo_green"
         app:layout_constraintBottom_toBottomOf="parent">
 
-        <!-- Top row: butterfly count and detection status -->
+        <!-- Detection status and photo count row -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="48dp"
             android:orientation="horizontal"
             android:weightSum="2"
             android:layout_marginBottom="4dp">
-
-            <TextView
-                android:id="@+id/butterfly_count_text"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:background="@color/logo_dark_green"
-                android:gravity="center"
-                android:text="Butterflies detected: 0"
-                android:textColor="@android:color/black"
-                android:textSize="14sp"
-                android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/detection_status_text"
@@ -69,14 +45,6 @@
                 android:textColor="@android:color/black"
                 android:textSize="14sp"
                 android:textStyle="bold" />
-        </LinearLayout>
-
-        <!-- Bottom row: mode switch and photo count -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:orientation="horizontal"
-            android:weightSum="2">
 
             <TextView
                 android:id="@+id/photo_count_text"
@@ -89,21 +57,9 @@
                 android:textColor="@android:color/black"
                 android:textSize="14sp"
                 android:textStyle="bold" />
-
-            <Switch
-                android:id="@+id/mode_switch"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:text="Counting Mode"
-                android:textColor="@android:color/black"
-                android:textSize="14sp"
-                android:textStyle="bold"
-                android:background="@color/logo_dark_green" />
         </LinearLayout>
 
-        <!-- Small bottom status text -->
+        <!-- Bottom status text -->
         <TextView
             android:id="@+id/status_text"
             android:layout_width="match_parent"

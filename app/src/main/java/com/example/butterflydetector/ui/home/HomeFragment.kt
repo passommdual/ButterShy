@@ -11,9 +11,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.CompoundButton
 import android.widget.Toast
-import android.widget.Switch
 import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.app.ActivityCompat
@@ -27,6 +25,7 @@ import kotlinx.coroutines.launch
 import java.io.File
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
+import androidx.core.graphics.createBitmap
 
 class HomeFragment : Fragment() {
 
@@ -41,8 +40,6 @@ class HomeFragment : Fragment() {
     private var cameraProvider: ProcessCameraProvider? = null
 
     private lateinit var butterflyDetector: ButterflyDetector
-    private var currentButterflyCount = 0
-    private var useCountingMode = false
 
     private val captureHandler = Handler(Looper.getMainLooper())
     private var captureRunnable: Runnable? = null
@@ -92,23 +89,12 @@ class HomeFragment : Fragment() {
         homeViewModel.photoCount.observe(viewLifecycleOwner) { count ->
             binding.photoCountText.text = "Photos captured: $count"
         }
-        homeViewModel.butterflyCount.observe(viewLifecycleOwner) { count ->
-            binding.butterflyCountText.text = "Butterflies detected: $count"
-        }
         homeViewModel.detectionStatus.observe(viewLifecycleOwner) { status ->
             binding.detectionStatusText.text = status
         }
         homeViewModel.isCapturing.observe(viewLifecycleOwner) { isCapturing ->
             if (isCapturing && !isAutoCapturing) startAutoCapture()
             else if (!isCapturing && isAutoCapturing) stopAutoCapture()
-        }
-
-        // Mode switch listener
-        binding.modeSwitch.setOnCheckedChangeListener { _: CompoundButton, isChecked: Boolean ->
-            useCountingMode = isChecked
-            binding.gridOverlay.visibility = if (isChecked) View.VISIBLE else View.GONE
-            val modeText = if (isChecked) "Counting Mode" else "Simple Mode"
-            homeViewModel.updateDetectionStatus("Mode: $modeText")
         }
 
         cameraExecutor = Executors.newSingleThreadExecutor()
@@ -164,57 +150,16 @@ class HomeFragment : Fragment() {
             val bitmap = imageProxyToBitmap(imageProxy)
             lifecycleScope.launch {
                 try {
-                    if (useCountingMode) {
-                        // Counting mode
-                        val rows = 3
-                        val cols = 3
-                        val quadrantWidth = bitmap.width / cols
-                        val quadrantHeight = bitmap.height / rows
-                        val grid = Array(rows) { BooleanArray(cols) }
+                    if (detectionHistory.size >= HISTORY_SIZE) detectionHistory.removeFirst()
+                    detectionHistory.addLast(butterflyDetector.detectButterfly(bitmap))
 
-                        for (r in 0 until rows) {
-                            for (c in 0 until cols) {
-                                val x = c * quadrantWidth
-                                val y = r * quadrantHeight
-                                val w = if (c == cols - 1) bitmap.width - x else quadrantWidth
-                                val h = if (r == rows - 1) bitmap.height - y else quadrantHeight
-                                val quad = Bitmap.createBitmap(bitmap, x, y, w, h)
-                                grid[r][c] = butterflyDetector.detectButterfly(quad)
-                            }
-                        }
+                    val positives = detectionHistory.count { it }
+                    val butterflyDetected = positives > HISTORY_SIZE / 2
 
-                        // Merge adjacent positives
-                        val visited = Array(rows) { BooleanArray(cols) }
-                        var uniqueCount = 0
-                        fun floodFill(r: Int, c: Int) {
-                            if (r !in 0 until rows || c !in 0 until cols) return
-                            if (!grid[r][c] || visited[r][c]) return
-                            visited[r][c] = true
-                            for (dr in -1..1) for (dc in -1..1) if (dr != 0 || dc != 0) floodFill(r + dr, c + dc)
-                        }
-                        for (r in 0 until rows) for (c in 0 until cols) if (grid[r][c] && !visited[r][c]) {
-                            uniqueCount++
-                            floodFill(r, c)
-                        }
-                        currentButterflyCount = uniqueCount
-                        homeViewModel.updateButterflyCount(currentButterflyCount)
-                        homeViewModel.updateDetectionStatus(
-                            if (uniqueCount > 0) "Detection: $uniqueCount butterflies found!"
-                            else "Detection: No butterfly"
-                        )
-                    } else {
-                        // Simple detection mode
-                        if (detectionHistory.size >= HISTORY_SIZE) detectionHistory.removeFirst()
-                        detectionHistory.addLast(butterflyDetector.detectButterfly(bitmap))
-                        val positives = detectionHistory.count { it }
-                        val majorityDetected = positives > HISTORY_SIZE / 2
-                        currentButterflyCount = if (majorityDetected) 1 else 0
-                        homeViewModel.updateButterflyCount(currentButterflyCount)
-                        homeViewModel.updateDetectionStatus(
-                            if (majorityDetected) "Detection: Butterfly found!"
-                            else "Detection: No butterfly"
-                        )
-                    }
+                    homeViewModel.updateDetectionStatus(
+                        if (butterflyDetected) "Detection: Butterfly found!"
+                        else "Detection: No butterfly"
+                    )
                 } catch (e: Exception) {
                     Log.e(TAG, "Error in butterfly detection", e)
                     homeViewModel.updateDetectionStatus("Detection: Error")
@@ -233,11 +178,7 @@ class HomeFragment : Fragment() {
         buffer.rewind()
         val bytes = ByteArray(buffer.remaining())
         buffer.get(bytes)
-        return Bitmap.createBitmap(
-            imageProxy.width,
-            imageProxy.height,
-            Bitmap.Config.ARGB_8888
-        ).also { bitmap ->
+        return createBitmap(imageProxy.width, imageProxy.height).also { bitmap ->
             bitmap.copyPixelsFromBuffer(java.nio.ByteBuffer.wrap(bytes))
         }
     }

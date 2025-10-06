@@ -1,69 +1,74 @@
+
 # YoloFly 🦋
 
-Android App für automatische Schmetterlings-Erkennung mit YOLO und TensorFlow Lite.
+Android App zur Unterstützung der Datensammlung von Schmetterlingssichtungen für das Helmholtz Institut.
 
-## Branches
+## TODO
 
-### Repository Management
-- **main**
+### Anton
 
-### Development Branch
-- **develop**
-    - every feature branch should originate from develop
+- Kamerabutton switch
+- Kamera Button soll automatisierte Bildaufnahme beenden
+- Camera Button sollte als "Home Button" fungieren wenn auf anderen Screens
+  als dem Home/Camera Screen
+- wenn auf Home/Camera Screen dann sollte er die automatisierte Bildaufnahme starten und beenden
+- Topbarfix DONE (hacked)
 
-### feature/base-structure
-- **feature/base-structure**
-    - the base structure of the app
-    - no real functionality
-    - starting point of development
+### Manon Richnii--
 
-### KI Training
-- **tensorflow-yolo-training** - TensorFlow/YOLO Modell-Training [vibecoded] (Training Branch)
+- Tutorial
+  - Start bei erstmaligem Öffnen der App
+  - Extra Screen, der auch erneut aufrufbar ist
+  - einfacher Text zur Erklärung
 
+### Pascal
 
-### Android App Development
-- **vibecode-ertch** - Kotlin App [videcoded] (Working Branch ertch)
-
+- Persistente Favoriten DONE
+- Fix der Buttons (Burgermenu hat zu viele Optionen)
+- Homescreen Name change DONE
+- Disablen der Zählfunktion/Des Toggles im Homescreen DONE
+- ReadMe aufräumen DONE
 
 
 ## Features
 
-### Main
-- Prasentation Branch
+- automated capturing of pictures (every 0.5 seconds)
+- automated sending of pictures to a selection screen
+  - selection of pictures you want to send to the image classification AI
+- speciescatalog with 500 species
+  - user can get information about every species
+  - user can see which species they already photographed
+  - user can select their favorite species
 
-### App (vibecode-ertch Branch)
+## Branches
 
-- **Auto-Capture** (bis zu 30 Fotos bei Schmetterlings-Detektion)
-- **Manueller Modus** nach Auto-Phase
-- **Top-9 Galerie** mit höchsten Konfidenz-Werten
-- **TensorFlow Lite** YOLO Integration
-- **Material Design** UI
+### Repository Management
 
-### KI Training (tensorflow-yolo-training Branch)
-- **YOLO Training Pipeline** für Schmetterlings-Erkennung
-- **Modell-Evaluation** und Metriken
-- **TensorFlow Lite Export** für Android Integration
-- **10 Schmetterlings-Klassen** vordefiniert
-- **Dataset-Struktur** für Training/Validation/Test
+- **main**
+  - Productionbranch
 
+### Development Branch
 
-## Getting Started
+- **develop**
+  - every feature branch should originate from develop
 
-### Android App Entwicklung
-```bash
-git checkout vibecode-ertch
-# Projekt in Android Studio öffnen
-# TensorFlow Lite Modell hinzufügen
-# Build & Run
-```
+### Basisstruktur
 
-### KI Training
-```bash
-git checkout tensorflow-yolo-training
-# Python 3.10 Environment erstellen
-# pip install -r requirements.txt
-# Dataset vorbereiten
-# python train_butterfly_yolo.py
-```
+- **feature/base-structure**
+  - the base structure of the app
+  - no real functionality
+  - starting point of development
 
-### tag:HomeFragment level:debug tag:HomeFragment level:debug 
+### Prototyp/MVP
+
+- **prototype**
+  - MVP for marketplace presentation
+  - implemented core functionalities
+    - automated picture taking
+    - photoselection
+    - "pokedex"
+
+## Logging von Ergebnissen
+
+- **tag:HomeFragment level:debug tag:HomeFragment level:debug**
+  - zeigt ob Butterfly detected wurde und mit welcher Wahrscheinlichkeit und History
