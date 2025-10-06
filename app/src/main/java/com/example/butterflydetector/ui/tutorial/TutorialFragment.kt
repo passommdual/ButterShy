@@ -29,8 +29,8 @@ class TutorialFragment : Fragment() {
         val root: View = binding.root
 
         val textView: TextView = binding.textTutorial
-        tutorialViewModel.text.observe(viewLifecycleOwner) {
-            textView.text = it
+        tutorialViewModel.text.observe(viewLifecycleOwner) { text ->
+            textView.text = text
         }
         return root
     }
