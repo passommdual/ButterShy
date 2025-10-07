@@ -22,6 +22,48 @@
             android:textColor="@color/black"
             android:layout_marginBottom="24dp" />
 
+        <!-- Text-to-Speech Controls -->
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:layout_marginBottom="24dp">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/playButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Read Tutorial Aloud"
+                style="@style/Widget.MaterialComponents.Button"
+                android:paddingHorizontal="24dp"
+                android:paddingVertical="12dp"
+                android:textSize="16sp"
+                app:cornerRadius="24dp"
+                android:backgroundTint="@color/purple_500"
+                android:textColor="@color/white"
+                app:icon="@android:drawable/ic_media_play"
+                app:iconGravity="textStart"
+                android:layout_marginEnd="8dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/pauseButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Pause"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:paddingHorizontal="24dp"
+                android:paddingVertical="12dp"
+                android:textSize="16sp"
+                app:cornerRadius="24dp"
+                app:strokeColor="@color/purple_500"
+                android:textColor="@color/purple_500"
+                app:icon="@android:drawable/ic_media_pause"
+                app:iconGravity="textStart"
+                android:layout_marginStart="8dp" />
+
+        </LinearLayout>
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -45,13 +87,15 @@
                 android:orientation="horizontal"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:gravity="center_vertical">
+                android:gravity="center_vertical"
+                android:padding="16dp">
 
                 <ImageView
                     android:src="@drawable/ic_menu_camera"
                     android:layout_width="80dp"
                     android:layout_height="80dp"
-                    android:layout_marginEnd="16dp" />
+                    android:layout_marginEnd="16dp"
+                    android:contentDescription="Camera icon" />
 
                 <TextView
                     android:text="With the camera you can take pictures of butterflies. While the camera is open the button will automatically take pictures until you select the Photoselection. While you are anywhere else in the app, the button will take you back to the camera. To take pictures you will have to press the button again."
@@ -77,13 +121,15 @@
                 android:orientation="horizontal"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:gravity="center_vertical">
+                android:gravity="center_vertical"
+                android:padding="16dp">
 
                 <ImageView
                     android:src="@drawable/ic_menu_photoselection"
                     android:layout_width="80dp"
                     android:layout_height="80dp"
-                    android:layout_marginEnd="16dp" />
+                    android:layout_marginEnd="16dp"
+                    android:contentDescription="Photo selection icon" />
 
                 <TextView
                     android:text="The photoselection will show you the taken pictures. Here you can choose the best picture to send it to AI identification. "
@@ -108,13 +154,15 @@
                 android:orientation="horizontal"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:gravity="center_vertical">
+                android:gravity="center_vertical"
+                android:padding="16dp">
 
                 <ImageView
                     android:src="@drawable/ic_menu_transects"
                     android:layout_width="80dp"
                     android:layout_height="80dp"
-                    android:layout_marginEnd="16dp" />
+                    android:layout_marginEnd="16dp"
+                    android:contentDescription="Transects icon" />
 
                 <TextView
                     android:text="With the transects you can walk default routes and document any butterfly you can find."
