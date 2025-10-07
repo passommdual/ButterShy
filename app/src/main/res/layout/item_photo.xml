@@ -27,12 +27,11 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <!-- Selection overlay -->
+    <!-- Selection overlay - color will be set programmatically based on colorblind mode -->
     <View
         android:id="@+id/selection_overlay"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#4400FF00"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
