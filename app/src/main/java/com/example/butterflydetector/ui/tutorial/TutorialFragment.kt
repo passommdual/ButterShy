@@ -7,12 +7,14 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.example.butterflydetector.databinding.FragmentTutorialBinding
 import com.google.android.material.button.MaterialButton
+import com.google.android.material.card.MaterialCardView
 import java.util.*
 
 class TutorialFragment : Fragment(), TextToSpeech.OnInitListener {
@@ -119,6 +121,106 @@ class TutorialFragment : Fragment(), TextToSpeech.OnInitListener {
         }
     }
 
+    /**
+     * Extracts all text content from the tutorial layout dynamically
+     */
+    private fun extractTutorialText(): String {
+        val textBuilder = StringBuilder()
+
+        // Get the root ScrollView's child (LinearLayout)
+        val rootView = binding.root
+        val scrollViewChild = rootView.getChildAt(0)
+
+        if (scrollViewChild is LinearLayout) {
+            // Iterate through all children of the main LinearLayout
+            for (i in 0 until scrollViewChild.childCount) {
+                val child = scrollViewChild.getChildAt(i)
+
+                when (child) {
+                    is TextView -> {
+                        // Extract text from standalone TextViews
+                        val text = child.text.toString().trim()
+                        if (text.isNotEmpty() && child.id != binding.playButton.id && child.id != binding.pauseButton.id) {
+                            textBuilder.append(text)
+                            textBuilder.append(". ")
+                        }
+                    }
+                    is MaterialCardView -> {
+                        // Extract text from cards (feature descriptions)
+                        val cardText = extractTextFromViewGroup(child)
+                        if (cardText.isNotEmpty()) {
+                            textBuilder.append(cardText)
+                            textBuilder.append(". ")
+                        }
+                    }
+                    is LinearLayout -> {
+                        // Check if this is the button container (skip it)
+                        val hasPlayButton = findViewInGroup(child, binding.playButton.id)
+                        if (!hasPlayButton) {
+                            // Extract text from other LinearLayouts
+                            val layoutText = extractTextFromViewGroup(child)
+                            if (layoutText.isNotEmpty()) {
+                                textBuilder.append(layoutText)
+                                textBuilder.append(". ")
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return textBuilder.toString().trim()
+    }
+
+    /**
+     * Recursively extracts text from a ViewGroup
+     */
+    private fun extractTextFromViewGroup(viewGroup: ViewGroup): String {
+        val textBuilder = StringBuilder()
+
+        for (i in 0 until viewGroup.childCount) {
+            val child = viewGroup.getChildAt(i)
+
+            when (child) {
+                is TextView -> {
+                    val text = child.text.toString().trim()
+                    if (text.isNotEmpty()) {
+                        textBuilder.append(text)
+                        textBuilder.append(" ")
+                    }
+                }
+                is ViewGroup -> {
+                    // Recursively extract from nested ViewGroups
+                    val nestedText = extractTextFromViewGroup(child)
+                    if (nestedText.isNotEmpty()) {
+                        textBuilder.append(nestedText)
+                        textBuilder.append(" ")
+                    }
+                }
+            }
+        }
+
+        return textBuilder.toString().trim()
+    }
+
+    /**
+     * Helper function to check if a view with specific ID exists in a ViewGroup
+     */
+    private fun findViewInGroup(viewGroup: ViewGroup, targetId: Int): Boolean {
+        for (i in 0 until viewGroup.childCount) {
+            val child = viewGroup.getChildAt(i)
+            if (child.id == targetId) {
+                return true
+            }
+            if (child is ViewGroup) {
+                if (findViewInGroup(child, targetId)) {
+                    return true
+                }
+            }
+        }
+        return false
+    }
+
     private fun startReading() {
         if (!isTtsInitialized) {
             Toast.makeText(requireContext(), "Text-to-Speech not ready", Toast.LENGTH_SHORT).show()
@@ -128,26 +230,15 @@ class TutorialFragment : Fragment(), TextToSpeech.OnInitListener {
         // Stop any ongoing speech
         textToSpeech?.stop()
 
-        // Compile all tutorial text
-        val tutorialText = buildString {
-            append("Welcome to the Butterfly Detector! ")
-            append("This tutorial will guide you through the main features of the app. ")
-            append("\n\n")
-            append("First, the Camera feature. ")
-            append("With the camera you can take pictures of butterflies. ")
-            append("While the camera is open, the button will automatically take pictures until you select the Photo selection. ")
-            append("While you are anywhere else in the app, the button will take you back to the camera. ")
-            append("To take pictures you will have to press the button again. ")
-            append("\n\n")
-            append("Second, the Photo Selection feature. ")
-            append("The photo selection will show you the taken pictures. ")
-            append("Here you can choose the best picture to send it to AI identification. ")
-            append("\n\n")
-            append("Third, the Transects feature. ")
-            append("With the transects you can walk default routes and document any butterfly you can find. ")
-            append("\n\n")
-            append("That's all for the tutorial. Enjoy using the Butterfly Detector!")
+        // Extract text dynamically from the layout
+        val tutorialText = extractTutorialText()
+
+        if (tutorialText.isEmpty()) {
+            Toast.makeText(requireContext(), "No text to read", Toast.LENGTH_SHORT).show()
+            return
         }
+
+        Log.d("TTS", "Reading text: $tutorialText")
 
         val params = Bundle()
         params.putString(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "tutorialUtterance")
