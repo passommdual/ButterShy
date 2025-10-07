@@ -6,13 +6,16 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.Fragment
+import android.widget.LinearLayout
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
+import com.example.butterflydetector.R
 import com.example.butterflydetector.databinding.FragmentSpeciescatalogBinding
 import com.example.butterflydetector.data.ButterflyEntity
+import com.example.butterflydetector.ui.base.BaseFragment
+import com.google.android.material.textfield.TextInputLayout
 
-class SpeciesCatalogFragment : Fragment() {
+class SpeciesCatalogFragment : BaseFragment() {
 
     private var _binding: FragmentSpeciescatalogBinding? = null
     private val binding get() = _binding!!
@@ -37,8 +40,24 @@ class SpeciesCatalogFragment : Fragment() {
         return binding.root
     }
 
+    override fun applyColorMode(view: View) {
+        super.applyColorMode(view)
+
+        // Apply background color to main layout
+        val mainLayout = view.findViewById<LinearLayout>(R.id.species_catalog_main_layout)
+        mainLayout?.setBackgroundColor(getBookPages())
+
+        // Apply colors to TextInputLayouts
+        val filterLayout1 = view.findViewById<TextInputLayout>(R.id.species_filter_layout_1)
+        val filterLayout2 = view.findViewById<TextInputLayout>(R.id.species_filter_layout_2)
+
+        filterLayout1?.setBackgroundColor(getLogoGreen())
+        filterLayout2?.setBackgroundColor(getLogoGreen())
+    }
+
     private fun setupRecyclerView() {
         adapter = ButterflyAdapter(
+            context = requireContext(),
             onInfoClick = { butterfly -> showButterflyInfo(butterfly) },
             onFavoriteClick = { butterfly -> viewModel.toggleFavorite(butterfly) }
         )
