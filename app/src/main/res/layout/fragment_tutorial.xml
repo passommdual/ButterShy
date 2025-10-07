@@ -31,8 +31,9 @@
             android:gravity="center"
             android:layout_marginBottom="20dp">
 
+            <!-- Play/Resume Button - Visible at start and when paused -->
             <com.google.android.material.button.MaterialButton
-                android:id="@+id/playButton"
+                android:id="@+id/playResumeButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Read Aloud"
@@ -47,13 +48,35 @@
                 app:icon="@android:drawable/ic_media_play"
                 app:iconGravity="textStart"
                 app:iconSize="18dp"
-                android:layout_marginEnd="8dp" />
+                android:layout_marginEnd="8dp"
+                android:visibility="visible" />
 
+            <!-- Pause Button - Only visible when playing -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/pauseButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Pause"
+                style="@style/Widget.MaterialComponents.Button"
+                android:paddingHorizontal="16dp"
+                android:paddingVertical="8dp"
+                android:textSize="14sp"
+                android:minHeight="40dp"
+                app:cornerRadius="20dp"
+                android:backgroundTint="@color/logo_dark_green"
+                android:textColor="@color/white"
+                app:icon="@android:drawable/ic_media_pause"
+                app:iconGravity="textStart"
+                app:iconSize="18dp"
+                android:layout_marginStart="8dp"
+                android:visibility="gone" />
+
+            <!-- Read from Top Button - Only visible when paused -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/readFromTopButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Read from Top"
                 style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                 android:paddingHorizontal="16dp"
                 android:paddingVertical="8dp"
@@ -63,17 +86,18 @@
                 app:strokeColor="@color/logo_dark_green"
                 app:strokeWidth="2dp"
                 android:textColor="@color/logo_dark_green"
-                app:icon="@android:drawable/ic_media_pause"
+                app:icon="@android:drawable/ic_menu_revert"
                 app:iconGravity="textStart"
                 app:iconSize="18dp"
-                android:layout_marginStart="8dp" />
+                android:layout_marginStart="8dp"
+                android:visibility="gone" />
 
         </LinearLayout>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Willkommen beim Butterfly Detector!"
+            android:text="Welcome to the Butterfly Detector!"
             android:textSize="24sp"
             android:textStyle="bold"
             android:textColor="@color/black"

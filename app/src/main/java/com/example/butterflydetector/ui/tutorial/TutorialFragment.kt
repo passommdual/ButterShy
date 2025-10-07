@@ -29,8 +29,13 @@ class TutorialFragment : BaseFragment(), TextToSpeech.OnInitListener {
     private var isReading = false
     private var isPaused = false
 
-    private lateinit var playButton: MaterialButton
+    // <CHANGE> Added variables for true pause/resume functionality
+    private var tutorialSentences: List<String> = emptyList()
+    private var currentSentenceIndex: Int = 0
+
+    private lateinit var playResumeButton: MaterialButton
     private lateinit var pauseButton: MaterialButton
+    private lateinit var readFromTopButton: MaterialButton
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -51,11 +56,12 @@ class TutorialFragment : BaseFragment(), TextToSpeech.OnInitListener {
         // Initialize TextToSpeech
         textToSpeech = TextToSpeech(requireContext(), this)
 
-        // Setup buttons
-        playButton = binding.playButton
+        // <CHANGE> Setup all three buttons
+        playResumeButton = binding.playResumeButton
         pauseButton = binding.pauseButton
+        readFromTopButton = binding.readFromTopButton
 
-        playButton.setOnClickListener {
+        playResumeButton.setOnClickListener {
             if (isTtsInitialized) {
                 if (isPaused) {
                     resumeReading()
@@ -71,13 +77,16 @@ class TutorialFragment : BaseFragment(), TextToSpeech.OnInitListener {
             pauseReading()
         }
 
-        // Initially disable pause button
-        pauseButton.isEnabled = false
+        readFromTopButton.setOnClickListener {
+            readFromTop()
+        }
+
+        // <CHANGE> Set initial button visibility
+        updateButtonVisibility()
 
         return root
     }
 
-    // <CHANGE> Override applyColorMode to support colorblind mode
     override fun applyColorMode(view: View) {
         super.applyColorMode(view)
 
@@ -99,9 +108,10 @@ class TutorialFragment : BaseFragment(), TextToSpeech.OnInitListener {
         card3?.setCardBackgroundColor(getLogoGreen())
 
         // Apply button colors
-        playButton.setBackgroundColor(getLogoDarkGreen())
-        pauseButton.strokeColor = android.content.res.ColorStateList.valueOf(getLogoDarkGreen())
-        pauseButton.setTextColor(getLogoDarkGreen())
+        playResumeButton.setBackgroundColor(getLogoDarkGreen())
+        pauseButton.setBackgroundColor(getLogoDarkGreen())
+        readFromTopButton.strokeColor = android.content.res.ColorStateList.valueOf(getLogoDarkGreen())
+        readFromTopButton.setTextColor(getLogoDarkGreen())
     }
 
     override fun onInit(status: Int) {
@@ -116,20 +126,30 @@ class TutorialFragment : BaseFragment(), TextToSpeech.OnInitListener {
                 isTtsInitialized = true
                 Log.d("TTS", "TextToSpeech initialized successfully")
 
-                // Set up utterance progress listener
+                // <CHANGE> Set up utterance progress listener for sentence-by-sentence reading
                 textToSpeech?.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
                     override fun onStart(utteranceId: String?) {
                         activity?.runOnUiThread {
                             isReading = true
-                            updateButtonStates()
+                            updateButtonVisibility()
                         }
                     }
 
                     override fun onDone(utteranceId: String?) {
                         activity?.runOnUiThread {
-                            isReading = false
-                            isPaused = false
-                            updateButtonStates()
+                            // Move to next sentence
+                            currentSentenceIndex++
+
+                            if (currentSentenceIndex < tutorialSentences.size && !isPaused) {
+                                // Continue reading next sentence
+                                speakCurrentSentence()
+                            } else {
+                                // Finished reading all sentences
+                                isReading = false
+                                isPaused = false
+                                currentSentenceIndex = 0
+                                updateButtonVisibility()
+                            }
                         }
                     }
 
@@ -137,7 +157,8 @@ class TutorialFragment : BaseFragment(), TextToSpeech.OnInitListener {
                         activity?.runOnUiThread {
                             isReading = false
                             isPaused = false
-                            updateButtonStates()
+                            currentSentenceIndex = 0
+                            updateButtonVisibility()
                             Toast.makeText(requireContext(), "Error reading text", Toast.LENGTH_SHORT).show()
                         }
                     }
@@ -169,7 +190,8 @@ class TutorialFragment : BaseFragment(), TextToSpeech.OnInitListener {
                     is TextView -> {
                         // Extract text from standalone TextViews
                         val text = child.text.toString().trim()
-                        if (text.isNotEmpty() && child.id != binding.playButton.id && child.id != binding.pauseButton.id) {
+                        if (text.isNotEmpty() && child.id != binding.playResumeButton.id &&
+                            child.id != binding.pauseButton.id && child.id != binding.readFromTopButton.id) {
                             textBuilder.append(text)
                             textBuilder.append(". ")
                         }
@@ -184,7 +206,7 @@ class TutorialFragment : BaseFragment(), TextToSpeech.OnInitListener {
                     }
                     is LinearLayout -> {
                         // Check if this is the button container (skip it)
-                        val hasPlayButton = findViewInGroup(child, binding.playButton.id)
+                        val hasPlayButton = findViewInGroup(child, binding.playResumeButton.id)
                         if (!hasPlayButton) {
                             // Extract text from other LinearLayouts
                             val layoutText = extractTextFromViewGroup(child)
@@ -250,6 +272,29 @@ class TutorialFragment : BaseFragment(), TextToSpeech.OnInitListener {
         return false
     }
 
+    // <CHANGE> Split text into sentences for true pause/resume functionality
+    private fun splitIntoSentences(text: String): List<String> {
+        // Split by sentence-ending punctuation, keeping the punctuation
+        val sentences = text.split(Regex("(?<=[.!?])\\s+"))
+            .filter { it.isNotBlank() }
+            .map { it.trim() }
+
+        return sentences
+    }
+
+    // <CHANGE> Speak the current sentence
+    private fun speakCurrentSentence() {
+        if (currentSentenceIndex < tutorialSentences.size) {
+            val sentence = tutorialSentences[currentSentenceIndex]
+            val params = Bundle()
+            params.putString(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "sentence_$currentSentenceIndex")
+
+            textToSpeech?.speak(sentence, TextToSpeech.QUEUE_FLUSH, params, "sentence_$currentSentenceIndex")
+
+            Log.d("TTS", "Speaking sentence $currentSentenceIndex: $sentence")
+        }
+    }
+
     private fun startReading() {
         if (!isTtsInitialized) {
             Toast.makeText(requireContext(), "Text-to-Speech not ready", Toast.LENGTH_SHORT).show()
@@ -267,49 +312,77 @@ class TutorialFragment : BaseFragment(), TextToSpeech.OnInitListener {
             return
         }
 
-        Log.d("TTS", "Reading text: $tutorialText")
+        // <CHANGE> Split into sentences and start from beginning
+        tutorialSentences = splitIntoSentences(tutorialText)
+        currentSentenceIndex = 0
+        isPaused = false
 
-        val params = Bundle()
-        params.putString(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "tutorialUtterance")
+        Log.d("TTS", "Starting reading. Total sentences: ${tutorialSentences.size}")
 
-        textToSpeech?.speak(tutorialText, TextToSpeech.QUEUE_FLUSH, params, "tutorialUtterance")
+        speakCurrentSentence()
 
         isReading = true
-        isPaused = false
-        updateButtonStates()
+        updateButtonVisibility()
     }
 
+    // <CHANGE> True pause functionality - stops at current sentence
     private fun pauseReading() {
-        if (isReading && !isPaused) {
+        if (isReading) {
             textToSpeech?.stop()
             isPaused = true
             isReading = false
-            updateButtonStates()
-            Toast.makeText(requireContext(), "Reading paused", Toast.LENGTH_SHORT).show()
+            updateButtonVisibility()
+            Toast.makeText(requireContext(), "Reading paused at sentence ${currentSentenceIndex + 1} of ${tutorialSentences.size}", Toast.LENGTH_SHORT).show()
         }
     }
 
+    // <CHANGE> True resume functionality - continues from paused position
     private fun resumeReading() {
-        // Note: Android TTS doesn't support true pause/resume
-        // So we restart from the beginning
-        Toast.makeText(requireContext(), "Restarting from beginning", Toast.LENGTH_SHORT).show()
-        isPaused = false
-        startReading()
+        if (isPaused && currentSentenceIndex < tutorialSentences.size) {
+            isPaused = false
+            isReading = true
+
+            Log.d("TTS", "Resuming from sentence $currentSentenceIndex")
+
+            speakCurrentSentence()
+            updateButtonVisibility()
+            Toast.makeText(requireContext(), "Resuming from sentence ${currentSentenceIndex + 1}", Toast.LENGTH_SHORT).show()
+        }
     }
 
-    private fun updateButtonStates() {
-        if (isReading) {
-            playButton.isEnabled = false
-            pauseButton.isEnabled = true
-            playButton.text = "Playing..."
-        } else if (isPaused) {
-            playButton.isEnabled = true
-            pauseButton.isEnabled = false
-            playButton.text = "Resume"
-        } else {
-            playButton.isEnabled = true
-            pauseButton.isEnabled = false
-            playButton.text = "Read Aloud"
+    // <CHANGE> Read from top functionality - restarts from beginning
+    private fun readFromTop() {
+        currentSentenceIndex = 0
+        isPaused = false
+        startReading()
+        Toast.makeText(requireContext(), "Reading from the beginning", Toast.LENGTH_SHORT).show()
+    }
+
+    // <CHANGE> Update button visibility based on state
+    private fun updateButtonVisibility() {
+        when {
+            isReading -> {
+                // Playing state: Show only Pause button
+                playResumeButton.visibility = View.GONE
+                pauseButton.visibility = View.VISIBLE
+                readFromTopButton.visibility = View.GONE
+            }
+            isPaused -> {
+                // Paused state: Show Resume and Read from Top buttons
+                playResumeButton.visibility = View.VISIBLE
+                playResumeButton.text = "Resume"
+                playResumeButton.setIconResource(android.R.drawable.ic_media_play)
+                pauseButton.visibility = View.GONE
+                readFromTopButton.visibility = View.VISIBLE
+            }
+            else -> {
+                // Initial/Stopped state: Show only Play button
+                playResumeButton.visibility = View.VISIBLE
+                playResumeButton.text = "Read Aloud"
+                playResumeButton.setIconResource(android.R.drawable.ic_media_play)
+                pauseButton.visibility = View.GONE
+                readFromTopButton.visibility = View.GONE
+            }
         }
     }
 
