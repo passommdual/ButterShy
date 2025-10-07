@@ -43,11 +43,16 @@ class HomeViewModel : ViewModel() {
         _detectionStatus.value = status
     }
 
-    fun clearPhotos() {
-        _capturedPhotos.clear()
-        _photoCount.value = 0
-        _text.value = "Camera Ready - Press camera button to start taking photos"
+
+    fun removePhotosAt(indices: Set<Int>) {
+        indices.sortedDescending().forEach { index ->
+            if (index in _capturedPhotos.indices) {
+                _capturedPhotos.removeAt(index)
+            }
+        }
+        _photoCount.value = _capturedPhotos.size
     }
+
 
     override fun onCleared() {
         super.onCleared()

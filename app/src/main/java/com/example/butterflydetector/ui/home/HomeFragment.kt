@@ -1,6 +1,7 @@
 package com.example.butterflydetector.ui.home
 
 import android.Manifest
+import android.content.Context
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -19,6 +20,7 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import com.example.butterflydetector.R
 import com.example.butterflydetector.databinding.FragmentHomeBinding
 import com.example.butterflydetector.ml.ButterflyDetector
 import kotlinx.coroutines.launch
@@ -29,10 +31,17 @@ import androidx.core.graphics.createBitmap
 
 class HomeFragment : Fragment() {
 
+    // Interface für MainActivity, um CameraButton zu steuern
+    interface CameraButtonController {
+        fun setCameraButtonIcon(isCapturing: Boolean)
+    }
+
+    lateinit var homeViewModel: HomeViewModel
+    private var cameraButtonController: CameraButtonController? = null
+
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
 
-    private lateinit var homeViewModel: HomeViewModel
     private lateinit var cameraExecutor: ExecutorService
     private var imageCapture: ImageCapture? = null
     private var imageAnalyzer: ImageAnalysis? = null
@@ -55,6 +64,18 @@ class HomeFragment : Fragment() {
 
     private val detectionHistory = ArrayDeque<Boolean>()
 
+    // -------------------- Fragment Lifecycle --------------------
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        if (context is CameraButtonController) cameraButtonController = context
+    }
+
+    override fun onDetach() {
+        super.onDetach()
+        cameraButtonController = null
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -66,15 +87,10 @@ class HomeFragment : Fragment() {
 
         butterflyDetector = ButterflyDetector.getInstance(requireContext())
 
-        // Initialize detector
+        // Modell initialisieren
         lifecycleScope.launch {
             val initialized = butterflyDetector.initialize()
-            if (initialized) {
-                homeViewModel.updateDetectionStatus("Detection: Ready")
-                imageAnalyzer?.setAnalyzer(cameraExecutor) { imageProxy ->
-                    processImageForButterflyDetection(imageProxy)
-                }
-            } else {
+            if (!initialized) {
                 homeViewModel.updateDetectionStatus("Detection: Failed to load model")
                 Toast.makeText(
                     requireContext(),
@@ -84,18 +100,12 @@ class HomeFragment : Fragment() {
             }
         }
 
-        // Observe ViewModel
+        // ViewModel Observer
         homeViewModel.text.observe(viewLifecycleOwner) { binding.statusText.text = it }
-        homeViewModel.photoCount.observe(viewLifecycleOwner) { count ->
-            binding.photoCountText.text = "Photos captured: $count"
+        homeViewModel.photoCount.observe(viewLifecycleOwner) {
+            binding.photoCountText.text = "Photos captured: $it"
         }
-        homeViewModel.detectionStatus.observe(viewLifecycleOwner) { status ->
-            binding.detectionStatusText.text = status
-        }
-        homeViewModel.isCapturing.observe(viewLifecycleOwner) { isCapturing ->
-            if (isCapturing && !isAutoCapturing) startAutoCapture()
-            else if (!isCapturing && isAutoCapturing) stopAutoCapture()
-        }
+        homeViewModel.detectionStatus.observe(viewLifecycleOwner) { binding.detectionStatusText.text = it }
 
         cameraExecutor = Executors.newSingleThreadExecutor()
         return root
@@ -103,41 +113,61 @@ class HomeFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        // Observer für Auto-Capture & Icon
+        homeViewModel.isCapturing.observe(viewLifecycleOwner) { isCapturing ->
+            if (isVisible) cameraButtonController?.setCameraButtonIcon(isCapturing)
+
+            if (isCapturing && !isAutoCapturing) startAutoCapture()
+            else if (!isCapturing && isAutoCapturing) stopAutoCapture()
+        }
+
+        // Kamera starten
         if (allPermissionsGranted()) startCamera()
-        else ActivityCompat.requestPermissions(
-            requireActivity(), REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS
-        )
+        else ActivityCompat.requestPermissions(requireActivity(), REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS)
     }
 
     override fun onResume() {
         super.onResume()
         if (allPermissionsGranted() && cameraProvider == null) startCamera()
+        if (homeViewModel.isCapturing.value == true && isVisible)
+            cameraButtonController?.setCameraButtonIcon(true)
     }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        stopAutoCapture()
+        cameraExecutor.shutdown()
+        cameraProvider?.unbindAll()
+        butterflyDetector.cleanup()
+        _binding = null
+    }
+
+    // -------------------- Camera / Photo Methods --------------------
 
     private fun startCamera() {
         val cameraProviderFuture = ProcessCameraProvider.getInstance(requireContext())
         cameraProviderFuture.addListener({
             cameraProvider = cameraProviderFuture.get()
+
             val preview = Preview.Builder().build().also {
                 it.setSurfaceProvider(binding.cameraPreview.surfaceProvider)
             }
+
             imageCapture = ImageCapture.Builder()
                 .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
                 .build()
+
             imageAnalyzer = ImageAnalysis.Builder()
                 .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                 .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_RGBA_8888)
                 .build()
-            imageAnalyzer?.setAnalyzer(cameraExecutor) { imageProxy ->
-                processImageForButterflyDetection(imageProxy)
-            }
+            imageAnalyzer?.setAnalyzer(cameraExecutor) { processImageForButterflyDetection(it) }
 
             val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
             try {
                 cameraProvider?.unbindAll()
-                camera = cameraProvider?.bindToLifecycle(
-                    this, cameraSelector, preview, imageCapture, imageAnalyzer
-                )
+                camera = cameraProvider?.bindToLifecycle(this, cameraSelector, preview, imageCapture, imageAnalyzer)
             } catch (exc: Exception) {
                 Log.e(TAG, "Use case binding failed", exc)
                 Toast.makeText(requireContext(), "Camera initialization failed", Toast.LENGTH_SHORT).show()
@@ -152,10 +182,8 @@ class HomeFragment : Fragment() {
                 try {
                     if (detectionHistory.size >= HISTORY_SIZE) detectionHistory.removeFirst()
                     detectionHistory.addLast(butterflyDetector.detectButterfly(bitmap))
-
                     val positives = detectionHistory.count { it }
                     val butterflyDetected = positives > HISTORY_SIZE / 2
-
                     homeViewModel.updateDetectionStatus(
                         if (butterflyDetected) "Detection: Butterfly found!"
                         else "Detection: No butterfly"
@@ -178,8 +206,8 @@ class HomeFragment : Fragment() {
         buffer.rewind()
         val bytes = ByteArray(buffer.remaining())
         buffer.get(bytes)
-        return createBitmap(imageProxy.width, imageProxy.height).also { bitmap ->
-            bitmap.copyPixelsFromBuffer(java.nio.ByteBuffer.wrap(bytes))
+        return createBitmap(imageProxy.width, imageProxy.height).also {
+            it.copyPixelsFromBuffer(java.nio.ByteBuffer.wrap(bytes))
         }
     }
 
@@ -204,14 +232,15 @@ class HomeFragment : Fragment() {
     }
 
     private fun capturePhoto() {
-        val imageCapture = imageCapture ?: return
+        val capture = imageCapture ?: return
         val tempFile = File.createTempFile("photo", ".jpg", requireContext().cacheDir)
         val outputFileOptions = ImageCapture.OutputFileOptions.Builder(tempFile).build()
-        imageCapture.takePicture(outputFileOptions, ContextCompat.getMainExecutor(requireContext()),
+        capture.takePicture(outputFileOptions, ContextCompat.getMainExecutor(requireContext()),
             object : ImageCapture.OnImageSavedCallback {
                 override fun onError(exception: ImageCaptureException) {
                     Log.e(TAG, "Photo capture failed: ${exception.message}", exception)
                 }
+
                 override fun onImageSaved(output: ImageCapture.OutputFileResults) {
                     try {
                         val file = output.savedUri?.path?.let { File(it) }
@@ -238,26 +267,15 @@ class HomeFragment : Fragment() {
         homeViewModel.stopCapturing()
     }
 
-    private fun allPermissionsGranted() = REQUIRED_PERMISSIONS.all {
-        ContextCompat.checkSelfPermission(requireContext(), it) == PackageManager.PERMISSION_GRANTED
-    }
+    // -------------------- Permissions --------------------
+
+    private fun allPermissionsGranted() =
+        REQUIRED_PERMISSIONS.all { ContextCompat.checkSelfPermission(requireContext(), it) == PackageManager.PERMISSION_GRANTED }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
         if (requestCode == REQUEST_CODE_PERMISSIONS) {
             if (allPermissionsGranted()) startCamera()
-            else {
-                Toast.makeText(requireContext(), "Permissions not granted", Toast.LENGTH_SHORT).show()
-                requireActivity().finish()
-            }
+            else Toast.makeText(requireContext(), "Permissions not granted", Toast.LENGTH_SHORT).show()
         }
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        stopAutoCapture()
-        cameraExecutor.shutdown()
-        cameraProvider?.unbindAll()
-        butterflyDetector.cleanup()
-        _binding = null
     }
 }
