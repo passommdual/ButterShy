@@ -13,4 +13,10 @@
     <string name="menu_transectwalks">Transectwalks</string>
     <string name="menu_camera">Camera</string>
     <string name="menu_tutorial">Tutorial</string>
+
+    <!-- Colorblind mode strings -->
+    <string name="colorblind_mode_enabled">Colorblind mode enabled</string>
+    <string name="colorblind_mode_disabled">Colorblind mode disabled</string>
+    <string name="settings_colorblind_on">Settings (Colorblind Mode: ON)</string>
+    <string name="settings_colorblind_off">Settings (Colorblind Mode: OFF)</string>
 </resources>

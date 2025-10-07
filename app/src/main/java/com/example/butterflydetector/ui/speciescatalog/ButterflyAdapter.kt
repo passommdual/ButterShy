@@ -1,5 +1,6 @@
 package com.example.butterflydetector.ui.speciescatalog
 
+import android.content.Context
 import android.graphics.Color
 import android.util.Log
 import android.view.LayoutInflater
@@ -13,8 +14,10 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.butterflydetector.R
 import com.example.butterflydetector.data.ButterflyEntity
+import com.example.butterflydetector.utils.ColorModeManager
 
 class ButterflyAdapter(
+    private val context: Context,
     private val onInfoClick: (ButterflyEntity) -> Unit,
     private val onFavoriteClick: (ButterflyEntity) -> Unit
 ) : ListAdapter<ButterflyEntity, ButterflyAdapter.ButterflyViewHolder>(ButterflyDiffCallback()) {
@@ -68,11 +71,18 @@ class ButterflyAdapter(
                 else android.R.drawable.star_big_off
             )
 
-            // Set tint color: yellow when favorite, grey when not
-            favoriteButton.setColorFilter(
-                if (butterfly.isFavorite) Color.parseColor("#FFEB3B") // Yellow
-                else Color.parseColor("#AAAAAA") // Grey
-            )
+            // In colorblind mode, use blue instead of yellow for better visibility
+            val favoriteColor = if (butterfly.isFavorite) {
+                if (ColorModeManager.isColorblindMode(context)) {
+                    Color.parseColor("#1c4587") // Dark blue (matches logo_dark_green_colorblind)
+                } else {
+                    Color.parseColor("#FFEB3B") // Yellow
+                }
+            } else {
+                Color.parseColor("#AAAAAA") // Grey
+            }
+
+            favoriteButton.setColorFilter(favoriteColor)
 
             // Click listeners
             infoButton.setOnClickListener { onInfoClick(butterfly) }

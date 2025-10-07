@@ -2,8 +2,10 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/photoselection_main_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/book_pages"
     tools:context=".ui.photoselection.PhotoSelectionFragment">
 
     <!-- Selection info and controls -->
@@ -51,6 +53,7 @@
             android:text="Clear"
             android:textSize="12sp"
             android:minHeight="32dp"
+            android:background="@color/logo_green"
             style="?android:attr/buttonStyleSmall" />
 
     </LinearLayout>
@@ -80,6 +83,7 @@
         android:text="Send to AI Identification"
         android:textSize="16sp"
         android:enabled="false"
+        android:background="@color/logo_dark_green"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />

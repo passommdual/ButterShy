@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Standard colors -->
     <color name="purple_200">#FFBB86FC</color>
     <color name="purple_500">#FF6200EE</color>
     <color name="purple_700">#FF3700B3</color>
@@ -7,7 +8,15 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+
+    <!-- Normal mode colors -->
     <color name="logo_green">#d8e0cb</color>
     <color name="logo_dark_green">#395a51</color>
     <color name="book_pages">#e5d3c1</color>
+
+    <!-- Colorblind mode colors (Deuteranopia-friendly) -->
+    <!-- Using blue-yellow palette instead of green-red -->
+    <color name="logo_green_colorblind">#cfe2f3</color> <!-- Light blue -->
+    <color name="logo_dark_green_colorblind">#1c4587</color> <!-- Dark blue -->
+    <color name="book_pages_colorblind">#fff2cc</color> <!-- Light yellow -->
 </resources>

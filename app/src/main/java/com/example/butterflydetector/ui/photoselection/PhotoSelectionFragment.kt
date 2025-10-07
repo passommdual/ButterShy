@@ -10,7 +10,6 @@ import android.view.ViewGroup
 import android.widget.CheckBox
 import android.widget.ImageView
 import android.widget.Toast
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
@@ -19,9 +18,11 @@ import com.example.butterflydetector.R
 import com.example.butterflydetector.data.PhotoDatabase
 import com.example.butterflydetector.databinding.FragmentPhotoselectionBinding
 import com.example.butterflydetector.ui.home.HomeViewModel
+import com.example.butterflydetector.ui.base.BaseFragment
+import com.example.butterflydetector.utils.ColorModeManager
 import kotlinx.coroutines.launch
 
-class PhotoSelectionFragment : Fragment() {
+class PhotoSelectionFragment : BaseFragment() {
 
     private var _binding: FragmentPhotoselectionBinding? = null
     private val binding get() = _binding!!
@@ -48,13 +49,30 @@ class PhotoSelectionFragment : Fragment() {
         return root
     }
 
+    override fun applyColorMode(view: View) {
+        super.applyColorMode(view)
+
+        // Apply background color to main layout
+        view.setBackgroundColor(getBookPages())
+
+        // Apply colors to buttons
+        binding.clearSelectionBtn.setBackgroundColor(getLogoGreen())
+        binding.sendToAiBtn.setBackgroundColor(getLogoDarkGreen())
+
+        // Update adapter with current color mode
+        if (::photoAdapter.isInitialized) {
+            photoAdapter.updateColorMode(ColorModeManager.isColorblindMode(requireContext()))
+        }
+    }
+
     private fun setupRecyclerView() {
         photoAdapter = PhotoAdapter(
             photos = emptyList(),
             onPhotoClick = { position, bitmap -> showPhotoZoom(bitmap) },
             onPhotoSelectionChanged = { position, isSelected ->
                 photoSelectionViewModel.togglePhotoSelection(position)
-            }
+            },
+            isColorblindMode = ColorModeManager.isColorblindMode(requireContext())
         )
         binding.photosRecyclerView.apply {
             layoutManager = GridLayoutManager(requireContext(), 3)
@@ -133,7 +151,8 @@ class PhotoSelectionFragment : Fragment() {
 class PhotoAdapter(
     private var photos: List<Bitmap>,
     private val onPhotoClick: (Int, Bitmap) -> Unit,
-    private val onPhotoSelectionChanged: (Int, Boolean) -> Unit
+    private val onPhotoSelectionChanged: (Int, Boolean) -> Unit,
+    private var isColorblindMode: Boolean = false
 ) : RecyclerView.Adapter<PhotoAdapter.PhotoViewHolder>() {
 
     private var selectedPhotos: Set<Int> = emptySet()
@@ -158,7 +177,19 @@ class PhotoAdapter(
 
         holder.checkbox.setOnCheckedChangeListener(null)
         holder.checkbox.isChecked = isSelected
-        holder.selectionOverlay.visibility = if (isSelected) View.VISIBLE else View.GONE
+
+        if (isSelected) {
+            holder.selectionOverlay.visibility = View.VISIBLE
+            // Green overlay for normal mode, blue overlay for colorblind mode
+            val overlayColor = if (isColorblindMode) {
+                0x440000FF // Semi-transparent blue
+            } else {
+                0x4400FF00 // Semi-transparent green
+            }
+            holder.selectionOverlay.setBackgroundColor(overlayColor)
+        } else {
+            holder.selectionOverlay.visibility = View.GONE
+        }
 
         // Click on image to zoom
         holder.imageView.setOnClickListener {
@@ -187,6 +218,11 @@ class PhotoAdapter(
 
     fun updateSelection(newSelection: Set<Int>) {
         selectedPhotos = newSelection
+        notifyDataSetChanged()
+    }
+
+    fun updateColorMode(colorblindMode: Boolean) {
+        isColorblindMode = colorblindMode
         notifyDataSetChanged()
     }
 }

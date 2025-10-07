@@ -17,6 +17,7 @@ import com.example.butterflydetector.databinding.ActivityMainBinding
 import com.example.butterflydetector.ui.home.HomeFragment
 import com.example.butterflydetector.data.ButterflyDatabase
 import com.example.butterflydetector.data.ButterflyEntity
+import com.example.butterflydetector.utils.ColorModeManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -39,6 +40,9 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         setSupportActionBar(binding.appBarMain.toolbar)
+
+        // Apply colors based on current mode
+        applyColorMode()
 
         //tutorialFirstStart()
 
@@ -117,6 +121,41 @@ class MainActivity : AppCompatActivity() {
         }
 
         setupBottomNavigation(navController)
+    }
+
+    private fun applyColorMode() {
+        val logoGreen = ColorModeManager.getLogoGreen(this)
+        val logoDarkGreen = ColorModeManager.getLogoDarkGreen(this)
+
+        // Apply to navigation view
+        binding.navView.setBackgroundColor(logoGreen)
+
+        val navHeaderView = binding.navView.getHeaderView(0)
+        val navHeaderLayout = navHeaderView?.findViewById<LinearLayout>(R.id.nav_header_layout)
+        navHeaderLayout?.setBackgroundColor(logoDarkGreen)
+
+        // Apply to toolbar background
+        binding.appBarMain.toolbar.setBackgroundColor(logoGreen)
+
+        // Apply to app bar containers
+        val outerContainer = binding.appBarMain.root.getChildAt(0) as? LinearLayout
+        outerContainer?.setBackgroundColor(logoDarkGreen)
+
+        val innerContainer = outerContainer?.getChildAt(0) as? LinearLayout
+        innerContainer?.setBackgroundColor(logoGreen)
+
+        // Apply to bottom navigation
+        val bottomNav = findViewById<LinearLayout>(R.id.bottom_navigation)
+        bottomNav?.setBackgroundColor(logoDarkGreen)
+
+        // Apply to bottom navigation buttons
+        val photoselectionBtn = findViewById<LinearLayout>(R.id.btn_photoselection)
+        val cameraBtn = findViewById<LinearLayout>(R.id.btn_camera)
+        val transectsBtn = findViewById<LinearLayout>(R.id.btn_transects)
+
+        photoselectionBtn?.setBackgroundColor(logoGreen)
+        cameraBtn?.setBackgroundColor(logoGreen)
+        transectsBtn?.setBackgroundColor(logoGreen)
     }
 
     private fun initializeDatabase() {
@@ -228,6 +267,12 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.main, menu)
+
+        // Update the settings menu item to show current mode
+        val settingsItem = menu.findItem(R.id.action_settings)
+        val isColorblind = ColorModeManager.isColorblindMode(this)
+        settingsItem?.title = if (isColorblind) "Settings (Colorblind Mode: ON)" else "Settings (Colorblind Mode: OFF)"
+
         return true
     }
 
@@ -240,7 +285,18 @@ class MainActivity : AppCompatActivity() {
                 true
             }
             R.id.action_settings -> {
-                Toast.makeText(this, "Settings clicked", Toast.LENGTH_SHORT).show()
+                // Toggle colorblind mode
+                val newMode = ColorModeManager.toggleColorblindMode(this)
+                val message = if (newMode) {
+                    "Colorblind mode enabled"
+                } else {
+                    "Colorblind mode disabled"
+                }
+
+                Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+
+                // Recreate activity to apply new colors
+                recreate()
                 true
             }
             else -> super.onOptionsItemSelected(item)
