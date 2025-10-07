@@ -2,10 +2,13 @@ package com.example.butterflydetector.ui.speciescatalog
 
 import android.app.AlertDialog
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ArrayAdapter
 import android.widget.LinearLayout
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
@@ -33,7 +36,7 @@ class SpeciesCatalogFragment : BaseFragment() {
         viewModel = ViewModelProvider(this)[SpeciesCatalogViewModel::class.java]
 
         setupRecyclerView()
-        setupSpeciesFilter()
+        setupFilters()
         observeViewModel()
 
         Log.d("ButterflyAdapter", "SpeciesCatalogFragment created")
@@ -47,12 +50,11 @@ class SpeciesCatalogFragment : BaseFragment() {
         val mainLayout = view.findViewById<LinearLayout>(R.id.species_catalog_main_layout)
         mainLayout?.setBackgroundColor(getBookPages())
 
-        // Apply colors to TextInputLayouts
-        val filterLayout1 = view.findViewById<TextInputLayout>(R.id.species_filter_layout_1)
-        val filterLayout2 = view.findViewById<TextInputLayout>(R.id.species_filter_layout_2)
+        val searchFilterLayout = view.findViewById<TextInputLayout>(R.id.search_filter_layout)
+        searchFilterLayout?.setBackgroundColor(getLogoGreen())
 
-        filterLayout1?.setBackgroundColor(getLogoGreen())
-        filterLayout2?.setBackgroundColor(getLogoGreen())
+        val speciesFilterLayout = view.findViewById<TextInputLayout>(R.id.species_filter_layout)
+        speciesFilterLayout?.setBackgroundColor(getLogoGreen())
     }
 
     private fun setupRecyclerView() {
@@ -66,40 +68,63 @@ class SpeciesCatalogFragment : BaseFragment() {
         binding.butterflyRecyclerView.adapter = adapter
     }
 
-    private fun setupSpeciesFilter() {
-        val selectedItems = mutableSetOf<String>()
-        binding.speciesFilterDropdown.setText("Select species...", false)
+    private fun setupFilters() {
+        val searchInput = binding.searchFilterInput
+        val dropdownInput = binding.speciesFilterDropdown
 
-        binding.speciesFilterDropdown.setOnClickListener {
-            viewModel.speciesList.value?.let { speciesList ->
-                val listWithFavorites = speciesList.toMutableList().apply { add("Favorites") }
-                val checkedItems = listWithFavorites.map { it in selectedItems }.toBooleanArray()
-
-                AlertDialog.Builder(requireContext())
-                    .setTitle("Select species")
-                    .setMultiChoiceItems(listWithFavorites.toTypedArray(), checkedItems) { _, which, isChecked ->
-                        val selected = listWithFavorites[which]
-                        if (isChecked) selectedItems.add(selected) else selectedItems.remove(selected)
-                    }
-                    .setPositiveButton("Apply") { _, _ ->
-                        val onlyFavorites = "Favorites" in selectedItems
-                        val selectedSpecies = selectedItems.filter { it != "Favorites" }
-                        viewModel.filterButterflies(selectedSpecies, onlyFavorites)
-
-                        binding.speciesFilterDropdown.setText(
-                            if (selectedItems.isEmpty()) "Select species..." else selectedItems.joinToString(", "),
-                            false
-                        )
-                    }
-                    .setNegativeButton("Cancel", null)
-                    .setNeutralButton("Reset") { _, _ ->
-                        selectedItems.clear()
-                        viewModel.filterButterflies(emptyList(), false)
-                        binding.speciesFilterDropdown.setText("Select species...", false)
-                    }
-                    .show()
-            }
+        // Setup dropdown with species list
+        viewModel.speciesList.observe(viewLifecycleOwner) { speciesList ->
+            val allOptions = mutableListOf("All Species").apply { addAll(speciesList) }
+            val arrayAdapter = ArrayAdapter(
+                requireContext(),
+                android.R.layout.simple_dropdown_item_1line,
+                allOptions
+            )
+            dropdownInput.setAdapter(arrayAdapter)
         }
+
+        // Real-time text search as user types
+        searchInput.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+
+            override fun afterTextChanged(s: Editable?) {
+                applyFilters()
+            }
+        })
+
+        // Handle dropdown selection
+        dropdownInput.setOnItemClickListener { _, _, position, _ ->
+            applyFilters()
+        }
+
+        // Favorites filter chip
+        binding.favoritesChip.setOnCheckedChangeListener { _, _ ->
+            applyFilters()
+        }
+
+        // Clear all filters
+        binding.clearFilterChip.setOnClickListener {
+            searchInput.setText("")
+            dropdownInput.setText("All Species", false)
+            binding.favoritesChip.isChecked = false
+            applyFilters()
+        }
+    }
+
+    private fun applyFilters() {
+        val searchQuery = binding.searchFilterInput.text?.toString()?.trim() ?: ""
+        val selectedSpecies = binding.speciesFilterDropdown.text?.toString()?.trim() ?: "All Species"
+        val favoritesOnly = binding.favoritesChip.isChecked
+
+        // Combine filters: if dropdown is not "All Species", use it; otherwise use search query
+        val finalQuery = if (selectedSpecies != "All Species") {
+            selectedSpecies
+        } else {
+            searchQuery
+        }
+
+        viewModel.searchAndFilter(finalQuery, favoritesOnly)
     }
 
     private fun observeViewModel() {

@@ -10,41 +10,82 @@
     android:background="@color/book_pages"
     tools:context=".ui.speciescatalog.SpeciesCatalogFragment">
 
-    <!-- Filter Spinner
+    <!-- Combined text search and dropdown filter in original layout style -->
 
-    Butterfly Grid -->
-
+    <!-- Text Search Input -->
     <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/species_filter_layout_1"
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+        android:id="@+id/search_filter_layout"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        android:background="@color/logo_green">
+        android:layout_marginBottom="8dp"
+        android:hint="Search by name or species"
+        android:background="@color/logo_green"
+        app:startIconDrawable="@android:drawable/ic_menu_search"
+        app:endIconMode="clear_text">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/searchFilterInput"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="text"
+            android:maxLines="1"
+            android:textSize="16sp" />
 
     </com.google.android.material.textfield.TextInputLayout>
 
+    <!-- Dropdown List Filter -->
     <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/species_filter_layout_2"
+        android:id="@+id/species_filter_layout"
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
+        android:layout_marginBottom="8dp"
+        android:hint="Filter by Species"
         android:background="@color/logo_green">
 
         <AutoCompleteTextView
             android:id="@+id/speciesFilterDropdown"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Filter by Species"
             android:inputType="none"
-            android:text="All Species" />
+            android:text="All Species"
+            android:textSize="16sp" />
+
     </com.google.android.material.textfield.TextInputLayout>
 
+    <!-- Filter Chips -->
+    <com.google.android.material.chip.ChipGroup
+        android:id="@+id/filterChipGroup"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        app:singleSelection="false"
+        app:chipSpacingHorizontal="8dp">
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/favoritesChip"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Favorites Only"
+            style="@style/Widget.MaterialComponents.Chip.Filter"
+            android:checkable="true" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/clearFilterChip"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Clear All"
+            style="@style/Widget.MaterialComponents.Chip.Action"
+            android:checkable="false" />
+
+    </com.google.android.material.chip.ChipGroup>
+
+    <!-- Butterfly Grid -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/butterflyRecyclerView"
         android:layout_width="match_parent"
-        android:layout_height="175dp"
+        android:layout_height="0dp"
         android:layout_weight="1"
         android:clipToPadding="false"
         android:padding="4dp" />
