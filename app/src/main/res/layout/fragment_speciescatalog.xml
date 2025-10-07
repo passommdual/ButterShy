@@ -10,84 +10,97 @@
     android:background="@color/book_pages"
     tools:context=".ui.speciescatalog.SpeciesCatalogFragment">
 
-    <!-- Combined text search and dropdown filter in original layout style -->
+    <!-- Spacer to push filters lower on screen -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="64dp"
+    android:visibility="invisible" />
 
-    <!-- Text Search Input -->
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/search_filter_layout"
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+    <!-- Combined Row: Search + Dropdown -->
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:orientation="horizontal"
         android:layout_marginBottom="8dp"
-        android:hint="Search by name or species"
-        android:background="@color/logo_green"
-        app:startIconDrawable="@android:drawable/ic_menu_search"
-        app:endIconMode="clear_text">
+        android:weightSum="2">
 
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/searchFilterInput"
-            android:layout_width="match_parent"
+        <!-- Text Search Input -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/search_filter_layout"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:inputType="text"
-            android:maxLines="1"
-            android:textSize="16sp" />
+            android:layout_weight="1"
+            android:hint="Search by name"
+            android:background="@color/logo_green"
+            app:startIconDrawable="@android:drawable/ic_menu_search"
+            app:endIconMode="clear_text">
 
-    </com.google.android.material.textfield.TextInputLayout>
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/searchFilterInput"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="text"
+                android:maxLines="1"
+                android:textSize="10sp" />
+        </com.google.android.material.textfield.TextInputLayout>
 
-    <!-- Dropdown List Filter -->
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/species_filter_layout"
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
-        android:hint="Filter by Species"
-        android:background="@color/logo_green">
-
-        <AutoCompleteTextView
-            android:id="@+id/speciesFilterDropdown"
-            android:layout_width="match_parent"
+        <!-- Dropdown List Filter -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/species_filter_layout"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:inputType="none"
-            android:text="All Species"
-            android:textSize="16sp" />
+            android:layout_weight="1"
+            android:layout_marginStart="8dp"
+            android:hint="Filter by Species"
+            android:background="@color/logo_green">
 
-    </com.google.android.material.textfield.TextInputLayout>
+            <AutoCompleteTextView
+                android:id="@+id/speciesFilterDropdown"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="none"
+                android:text="All Species"
+                android:textSize="10sp" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+    </LinearLayout>
 
     <!-- Filter Chips -->
     <com.google.android.material.chip.ChipGroup
         android:id="@+id/filterChipGroup"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        app:singleSelection="false"
-        app:chipSpacingHorizontal="8dp">
+        android:layout_marginBottom="4dp"
+    app:chipSpacingHorizontal="8dp"
+    app:singleSelection="false">
 
-        <com.google.android.material.chip.Chip
-            android:id="@+id/favoritesChip"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Favorites Only"
-            style="@style/Widget.MaterialComponents.Chip.Filter"
-            android:checkable="true" />
+    <com.google.android.material.chip.Chip
+        android:id="@+id/favoritesChip"
+        style="@style/Widget.MaterialComponents.Chip.Filter"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:checkable="true"
+        android:text="Favorites Only" />
 
-        <com.google.android.material.chip.Chip
-            android:id="@+id/clearFilterChip"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Clear All"
-            style="@style/Widget.MaterialComponents.Chip.Action"
-            android:checkable="false" />
+    <com.google.android.material.chip.Chip
+        android:id="@+id/clearFilterChip"
+        style="@style/Widget.MaterialComponents.Chip.Action"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:checkable="false"
+        android:text="Clear All" />
 
-    </com.google.android.material.chip.ChipGroup>
+</com.google.android.material.chip.ChipGroup>
 
     <!-- Butterfly Grid -->
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/butterflyRecyclerView"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:clipToPadding="false"
-        android:padding="4dp" />
+<androidx.recyclerview.widget.RecyclerView
+android:id="@+id/butterflyRecyclerView"
+android:layout_width="match_parent"
+android:layout_height="0dp"
+android:layout_weight="1"
+android:clipToPadding="false"
+android:padding="4dp" />
 
-</LinearLayout>
+    </LinearLayout>
