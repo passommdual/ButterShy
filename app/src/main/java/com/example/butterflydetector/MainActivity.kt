@@ -130,6 +130,10 @@ class MainActivity : AppCompatActivity() {
         // Apply to navigation view
         binding.navView.setBackgroundColor(logoGreen)
 
+        val navHeaderView = binding.navView.getHeaderView(0)
+        val navHeaderLayout = navHeaderView?.findViewById<LinearLayout>(R.id.nav_header_layout)
+        navHeaderLayout?.setBackgroundColor(logoDarkGreen)
+
         // Apply to toolbar background
         binding.appBarMain.toolbar.setBackgroundColor(logoGreen)
 
