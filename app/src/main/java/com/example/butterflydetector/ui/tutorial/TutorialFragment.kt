@@ -8,16 +8,18 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
+import android.widget.ScrollView
 import android.widget.TextView
 import android.widget.Toast
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import com.example.butterflydetector.R
 import com.example.butterflydetector.databinding.FragmentTutorialBinding
+import com.example.butterflydetector.ui.base.BaseFragment
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.card.MaterialCardView
 import java.util.*
 
-class TutorialFragment : Fragment(), TextToSpeech.OnInitListener {
+class TutorialFragment : BaseFragment(), TextToSpeech.OnInitListener {
 
     private var _binding: FragmentTutorialBinding? = null
     private val binding get() = _binding!!
@@ -73,6 +75,33 @@ class TutorialFragment : Fragment(), TextToSpeech.OnInitListener {
         pauseButton.isEnabled = false
 
         return root
+    }
+
+    // <CHANGE> Override applyColorMode to support colorblind mode
+    override fun applyColorMode(view: View) {
+        super.applyColorMode(view)
+
+        // Apply background color to ScrollView
+        val scrollView = view.findViewById<ScrollView>(R.id.tutorial_scroll_view)
+        scrollView?.setBackgroundColor(getBookPages())
+
+        // Apply background color to main LinearLayout
+        val mainLayout = view.findViewById<LinearLayout>(R.id.tutorial_main_layout)
+        mainLayout?.setBackgroundColor(getBookPages())
+
+        // Apply colors to MaterialCardViews
+        val card1 = view.findViewById<MaterialCardView>(R.id.tutorial_card_1)
+        val card2 = view.findViewById<MaterialCardView>(R.id.tutorial_card_2)
+        val card3 = view.findViewById<MaterialCardView>(R.id.tutorial_card_3)
+
+        card1?.setCardBackgroundColor(getLogoGreen())
+        card2?.setCardBackgroundColor(getLogoGreen())
+        card3?.setCardBackgroundColor(getLogoGreen())
+
+        // Apply button colors
+        playButton.setBackgroundColor(getLogoDarkGreen())
+        pauseButton.strokeColor = android.content.res.ColorStateList.valueOf(getLogoDarkGreen())
+        pauseButton.setTextColor(getLogoDarkGreen())
     }
 
     override fun onInit(status: Int) {
@@ -280,7 +309,7 @@ class TutorialFragment : Fragment(), TextToSpeech.OnInitListener {
         } else {
             playButton.isEnabled = true
             pauseButton.isEnabled = false
-            playButton.text = "Read Tutorial Aloud"
+            playButton.text = "Read Aloud"
         }
     }
 
