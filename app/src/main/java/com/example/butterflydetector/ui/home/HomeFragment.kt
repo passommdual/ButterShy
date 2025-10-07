@@ -11,23 +11,26 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.LinearLayout
+import android.widget.TextView
 import android.widget.Toast
 import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import com.example.butterflydetector.R
 import com.example.butterflydetector.databinding.FragmentHomeBinding
 import com.example.butterflydetector.ml.ButterflyDetector
+import com.example.butterflydetector.ui.base.BaseFragment
 import kotlinx.coroutines.launch
 import java.io.File
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import androidx.core.graphics.createBitmap
 
-class HomeFragment : Fragment() {
+class HomeFragment : BaseFragment() {
 
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
@@ -99,6 +102,21 @@ class HomeFragment : Fragment() {
 
         cameraExecutor = Executors.newSingleThreadExecutor()
         return root
+    }
+
+    override fun applyColorMode(view: View) {
+        super.applyColorMode(view)
+
+        // Apply background color to status container
+        val statusContainer = view.findViewById<LinearLayout>(R.id.status_container)
+        statusContainer?.setBackgroundColor(getLogoGreen())
+
+        // Apply background color to detection status and photo count text views
+        val detectionStatusText = view.findViewById<TextView>(R.id.detection_status_text)
+        val photoCountText = view.findViewById<TextView>(R.id.photo_count_text)
+
+        detectionStatusText?.setBackgroundColor(getLogoDarkGreen())
+        photoCountText?.setBackgroundColor(getLogoDarkGreen())
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
