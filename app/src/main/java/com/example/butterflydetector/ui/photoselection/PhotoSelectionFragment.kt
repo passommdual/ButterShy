@@ -82,8 +82,13 @@ class PhotoSelectionFragment : BaseFragment() {
 
     private fun setupClickListeners() {
         binding.clearSelectionBtn.setOnClickListener {
-            photoSelectionViewModel.clearSelection()
+            val selectedIndices = photoSelectionViewModel.selectedPhotos.value ?: emptySet()
+            homeViewModel.removePhotosAt(selectedIndices)    // nur ausgewählte löschen
+            photoSelectionViewModel.clearSelection()         // Auswahl zurücksetzen
+            photoAdapter.updatePhotos(homeViewModel.capturedPhotos) // Adapter aktualisieren
         }
+
+
 
         binding.sendToAiBtn.setOnClickListener {
             val photos = homeViewModel.capturedPhotos

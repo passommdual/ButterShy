@@ -5,14 +5,18 @@ import android.os.Bundle
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.drawerlayout.widget.DrawerLayout
+import androidx.navigation.NavController
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
+import androidx.navigation.ui.setupWithNavController
 import com.example.butterflydetector.databinding.ActivityMainBinding
 import com.example.butterflydetector.ui.home.HomeFragment
 import com.example.butterflydetector.data.ButterflyDatabase
@@ -27,15 +31,25 @@ import java.io.IOException
 import com.google.android.material.navigation.NavigationView
 import com.google.android.material.snackbar.Snackbar
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), HomeFragment.CameraButtonController {
 
-    private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
+    private lateinit var appBarConfiguration: AppBarConfiguration
+    private lateinit var navController: NavController
+
+    // Bottom nav custom views
+    private var photoBtn: LinearLayout? = null
+    private var cameraBtn: LinearLayout? = null
+    private var transectsBtn: LinearLayout? = null
+    private var cameraButtonIcon: ImageView? = null
+
+    private var pendingCaptureAfterNavigation = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         println("DEBUG: MainActivity onCreate reached")
 
         super.onCreate(savedInstanceState)
+
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -50,6 +64,7 @@ class MainActivity : AppCompatActivity() {
 
         val drawerLayout: DrawerLayout = binding.drawerLayout
         val navView: NavigationView = binding.navView
+        // TODO   val navView = binding.navView
         val navController = findNavController(R.id.nav_host_fragment_content_main)
 
 
@@ -58,7 +73,52 @@ class MainActivity : AppCompatActivity() {
                 R.id.nav_camera, R.id.nav_photoselection, R.id.nav_speciescatalog, R.id.nav_transects, R.id.nav_transectwalks, R.id.nav_tutorial
             ), drawerLayout
         )
+
         setupActionBarWithNavController(navController, appBarConfiguration)
+
+        // Bind burger menu (NavigationView) to NavController so drawer items navigate
+        navView.setupWithNavController(navController)
+        // WICHTIG: Bottom navbar custom views erst nach Layout-Inflation finden
+
+        findViewById<View>(android.R.id.content).post {
+            photoBtn = findViewById(R.id.btn_photoselection)
+            cameraBtn = findViewById(R.id.btn_camera)
+            transectsBtn = findViewById(R.id.btn_transects)
+            cameraButtonIcon = findViewById(R.id.btn_camera_icon)
+
+
+            // Bottom buttons: Photo
+            photoBtn?.setOnClickListener {
+                // Wenn wir von Camera weg navigieren, stoppe Capture
+                getCurrentHomeFragment()?.stopPhotoCapture()
+                safeNavigate(R.id.nav_photoselection)
+            }
+
+            // Bottom buttons: Camera
+            cameraBtn?.setOnClickListener {
+                val currentDest = navController.currentDestination?.id
+                if (currentDest == R.id.nav_camera) {
+                    // Bereits auf Camera: direkt Foto / Stop
+                    val homeFragment = getCurrentHomeFragment()
+                    if (homeFragment != null) {
+                        if (homeFragment.homeViewModel.isCapturing.value == true) homeFragment.stopPhotoCapture()
+                        else homeFragment.captureAdditionalPhoto()
+                    }
+                } else {
+                    // Navigiere zu Camera und löse Aufnahme nach Navigation aus
+                    pendingCaptureAfterNavigation = true
+                    safeNavigate(R.id.nav_camera)
+                }
+            }
+
+
+            // Bottom buttons: Transects
+            transectsBtn?.setOnClickListener {
+                getCurrentHomeFragment()?.stopPhotoCapture()
+                safeNavigate(R.id.nav_transects)
+            }
+        }
+
 
         navController.addOnDestinationChangedListener { _, destination, _ ->
             val menuItem = when (destination.id) {
@@ -123,6 +183,31 @@ class MainActivity : AppCompatActivity() {
         setupBottomNavigation(navController)
     }
 
+    // Vom HomeFragment gerufen, um das Kamera-Icon zu aktualisieren
+    override fun setCameraButtonIcon(isCapturing: Boolean) {
+        cameraButtonIcon?.setImageResource(if (isCapturing) R.drawable.ic_stop else R.drawable.ic_menu_camera)
+        // Wir setzen alpha nur, wenn wir auf Camera sind; ansonsten wird es vom Fragment gesteuert.
+        cameraBtn?.alpha = if (isCapturing) 0.5f else 1.0f
+    }
+
+    // Helper: sichere Navigation (vermeidet Navigate-to-same-destination)
+    private fun safeNavigate(destId: Int) {
+        val current = navController.currentDestination?.id
+        if (current != destId) {
+            navController.navigate(destId)
+            // Falls Drawer offen: schließen (optional)
+            if (binding.drawerLayout.isOpen) binding.drawerLayout.close()
+        }
+    }
+
+    // Markiere die aktuell gewählte Bottom-Navigation (nur visuelle Hilfestellung)
+    private fun updateBottomSelection(destinationId: Int) {
+        photoBtn?.isSelected = destinationId == R.id.nav_photoselection
+        cameraBtn?.isSelected = destinationId == R.id.nav_camera
+        transectsBtn?.isSelected = destinationId == R.id.nav_transects
+        // Hinweis: Kamera-Icon-Alpha wird vom Fragment (isCapturing) gesteuert via setCameraButtonIcon()
+    }
+
     private fun applyColorMode() {
         val logoGreen = ColorModeManager.getLogoGreen(this)
         val logoDarkGreen = ColorModeManager.getLogoDarkGreen(this)
@@ -168,6 +253,9 @@ class MainActivity : AppCompatActivity() {
                     val butterflies = loadButterfliesFromJson()
                     val database = ButterflyDatabase.getDatabase(applicationContext)
                     database.butterflyDao().insertAll(butterflies)
+        // TODO THIS CODE SECTION DOES NOT BELONG HERE , IT BELONGS TO onCreateView()
+                    // Bind burger menu (NavigationView) to NavController so drawer items navigate
+        // navView.setupWithNavController(navController)
 
                     sharedPrefs.edit().putBoolean("isFirstLaunch", false).apply()
 
@@ -246,17 +334,49 @@ class MainActivity : AppCompatActivity() {
             navController.navigate(R.id.nav_photoselection)
         }
 
-        cameraBtn?.setOnClickListener {
-            val currentFragment = getCurrentHomeFragment()
-            if (currentFragment != null) {
-                currentFragment.captureAdditionalPhoto()
-            } else {
-                navController.navigate(R.id.nav_camera)
+            // Bottom buttons: Camera
+            cameraBtn?.setOnClickListener {
+                val currentDest = navController.currentDestination?.id
+                if (currentDest == R.id.nav_camera) {
+                    // Bereits auf Camera: direkt Foto / Stop
+                    val homeFragment = getCurrentHomeFragment()
+                    if (homeFragment != null) {
+                        if (homeFragment.homeViewModel.isCapturing.value == true) homeFragment.stopPhotoCapture()
+                        else homeFragment.captureAdditionalPhoto()
+                    }
+                } else {
+                    // Navigiere zu Camera und löse Aufnahme nach Navigation aus
+                    pendingCaptureAfterNavigation = true
+                    safeNavigate(R.id.nav_camera)
+                }
             }
-        }
 
         transectsBtn?.setOnClickListener {
             navController.navigate(R.id.nav_transects)
+        }
+
+        navController.addOnDestinationChangedListener { _, destination, _ ->
+            // Bottom-Navbar visuell aktualisieren
+            updateBottomSelection(destination.id)
+
+            val homeFragment = getCurrentHomeFragment()
+
+            // Wenn man weg vom Camera-Fragment navigiert → Aufnahme stoppen
+            if (destination.id != R.id.nav_camera) {
+                homeFragment?.stopPhotoCapture()
+            }
+
+            // Wenn man zum Camera-Fragment navigiert
+            if (destination.id == R.id.nav_camera) {
+                // Wenn der Wechsel über Bottom-Nav oder Drawer kam → Kamera starten
+                if (pendingCaptureAfterNavigation) {
+                    homeFragment?.captureAdditionalPhoto()
+                    pendingCaptureAfterNavigation = false
+                } else {
+                    // Wenn über Drawer direkt ausgewählt → Fotoaufnahme starten
+                    homeFragment?.captureAdditionalPhoto()
+                }
+            }
         }
     }
 
@@ -304,7 +424,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onSupportNavigateUp(): Boolean {
-        val navController = findNavController(R.id.nav_host_fragment_content_main)
         return navController.navigateUp(appBarConfiguration) || super.onSupportNavigateUp()
     }
 }
