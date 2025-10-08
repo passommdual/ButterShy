@@ -102,10 +102,16 @@ class TutorialFragment : BaseFragment(), TextToSpeech.OnInitListener {
         val card1 = view.findViewById<MaterialCardView>(R.id.tutorial_card_1)
         val card2 = view.findViewById<MaterialCardView>(R.id.tutorial_card_2)
         val card3 = view.findViewById<MaterialCardView>(R.id.tutorial_card_3)
+        val card4 = view.findViewById<MaterialCardView>(R.id.tutorial_card_4)
+        val card5 = view.findViewById<MaterialCardView>(R.id.tutorial_card_5)
+
 
         card1?.setCardBackgroundColor(getLogoGreen())
         card2?.setCardBackgroundColor(getLogoGreen())
         card3?.setCardBackgroundColor(getLogoGreen())
+        card4?.setCardBackgroundColor(getLogoGreen())
+        card5?.setCardBackgroundColor(getLogoGreen())
+
 
         // Apply button colors
         playResumeButton.setBackgroundColor(getLogoDarkGreen())

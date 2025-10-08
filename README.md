@@ -7,19 +7,22 @@ Android App zur Unterstützung der Datensammlung von Schmetterlingssichtungen f�
 
 ### Anton
 
-- Kamerabutton switch
-- Kamera Button soll automatisierte Bildaufnahme beenden
+- Kamerabutton switch DONE
+- Kamera Button soll automatisierte Bildaufnahme beenden DONE
 - Camera Button sollte als "Home Button" fungieren wenn auf anderen Screens
-  als dem Home/Camera Screen
-- wenn auf Home/Camera Screen dann sollte er die automatisierte Bildaufnahme starten und beenden
+  als dem Home/Camera Screen DONE
+- wenn auf Home/Camera Screen dann sollte er die automatisierte Bildaufnahme starten und beenden DONE
 - Topbarfix DONE (hacked)
+- Clear Button in Photoselection (löscht aktuell aus dem screen (aus dem RAM auch?))
+
 
 ### Manon Richnii--
 
 - Tutorial
   - Start bei erstmaligem Öffnen der App //TODO
   - Extra Screen, der auch erneut aufrufbar ist (DONE)
-  - einfacher Text zur Erklärung (DONE, maybe erweitern für Speciescatalog)
+  - einfacher Text zur Erklärung (DONE)
+  - Erweitern für Speciescatalog
 
 ### Pascal
 
@@ -29,8 +32,19 @@ Android App zur Unterstützung der Datensammlung von Schmetterlingssichtungen f�
 - Disablen der Zählfunktion/Des Toggles im Homescreen DONE
 - ReadMe aufräumen DONE
 - Inklusionsfeatures DONE
-  - Vorlesefunktion
-  - Farbenblindmodus
+  - Vorlesefunktion Tutorial DONE
+  - Farbenblindmodus DONE
+
+#### Maybe
+- Nur Schmetterlingsbilder anzeigen
+- Clear Button in Photoselection (löscht aktuell aus dem screen (aus dem RAM auch?))
+- pt-Modell ausprobierem (statt onnx)
+- echte fotospeicherung
+- abfrage ob fotos an das backend geschickt werden sollen
+- check, welche Android version benötigt wird
+- multilingual
+- bildqualität
+
 
 ### Alle
 - Wirtschaftlichkeitsanalyse
