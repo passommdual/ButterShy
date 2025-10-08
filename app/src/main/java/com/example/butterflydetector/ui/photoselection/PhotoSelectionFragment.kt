@@ -102,16 +102,28 @@ class PhotoSelectionFragment : BaseFragment() {
         binding.sendToAiBtn.setOnClickListener {
             try {
                 val photos = homeViewModel.capturedPhotos
-                if (photos.isNotEmpty()) {
-                    photoSelectionViewModel.sendSelectedPhotosToDatabase(photos)
-                } else {
-                    Toast.makeText(requireContext(), "No photos to send", Toast.LENGTH_SHORT).show()
+                val selectedCount = photoSelectionViewModel.selectedPhotos.value?.size ?: 0
+
+                if (selectedCount == 0) {
+                    Toast.makeText(requireContext(), "No photos selected", Toast.LENGTH_SHORT).show()
+                    return@setOnClickListener
                 }
+
+                androidx.appcompat.app.AlertDialog.Builder(requireContext())
+                    .setTitle("Confirm Upload")
+                    .setMessage("Do you really want to send $selectedCount photo(s) to AI Identification?")
+                    .setPositiveButton("Yes") { _, _ ->
+                        photoSelectionViewModel.sendSelectedPhotosToDatabase(photos)
+                    }
+                    .setNegativeButton("Cancel", null)
+                    .show()
+
             } catch (e: Exception) {
-                Log.e("PhotoSelectionFragment", "Error sending photos to AI", e)
+                Log.e("PhotoSelectionFragment", "Error showing confirmation dialog", e)
                 Toast.makeText(requireContext(), "Error sending photos", Toast.LENGTH_SHORT).show()
             }
         }
+
     }
 
     private fun observeData() {
