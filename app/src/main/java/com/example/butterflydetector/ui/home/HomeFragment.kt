@@ -108,6 +108,7 @@ class HomeFragment : BaseFragment() {
         }
 
         // ViewModel Observer
+
         homeViewModel.text.observe(viewLifecycleOwner) { binding.statusText.text = it }
         homeViewModel.photoCount.observe(viewLifecycleOwner) { count ->
             binding.photoCountText.text = "Photos captured: $count"
@@ -121,17 +122,21 @@ class HomeFragment : BaseFragment() {
         }
 
         // TODO
-        //homeViewModel.text.observe(viewLifecycleOwner) { binding.statusText.text = it }
-        //homeViewModel.photoCount.observe(viewLifecycleOwner) {
-        //    binding.photoCountText.text = "Photos captured: $it"
-        //}
-        //homeViewModel.detectionStatus.observe(viewLifecycleOwner) { binding.detectionStatusText.text = it }
-
-        //cameraExecutor = Executors.newSingleThreadExecutor()
-        //return root
+        /*
+        homeViewModel.text.observe(viewLifecycleOwner) { binding.statusText.text = it }
+        homeViewModel.photoCount.observe(viewLifecycleOwner) {
+            binding.photoCountText.text = "Photos captured: $it"
+        }
+        homeViewModel.detectionStatus.observe(viewLifecycleOwner) { binding.detectionStatusText.text = it }
 
         cameraExecutor = Executors.newSingleThreadExecutor()
         return root
+
+         */
+
+        cameraExecutor = Executors.newSingleThreadExecutor()
+        return root
+
     }
 
     override fun applyColorMode(view: View) {
@@ -193,11 +198,13 @@ class HomeFragment : BaseFragment() {
                 .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                 .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_RGBA_8888)
                 .build()
+
             imageAnalyzer?.setAnalyzer(cameraExecutor) { imageProxy ->
                 processImageForButterflyDetection(imageProxy)
             }
 
-            // TODO          imageAnalyzer?.setAnalyzer(cameraExecutor) { processImageForButterflyDetection(it) }
+            // TODO
+            // imageAnalyzer?.setAnalyzer(cameraExecutor) { processImageForButterflyDetection(it) }
 
             val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
             try {
@@ -245,14 +252,19 @@ class HomeFragment : BaseFragment() {
         buffer.rewind()
         val bytes = ByteArray(buffer.remaining())
         buffer.get(bytes)
+
         return createBitmap(imageProxy.width, imageProxy.height).also { bitmap ->
             bitmap.copyPixelsFromBuffer(java.nio.ByteBuffer.wrap(bytes))
         }
 
+
         // TODO
-        //return createBitmap(imageProxy.width, imageProxy.height).also {
-        //    it.copyPixelsFromBuffer(java.nio.ByteBuffer.wrap(bytes))
-        //}
+        /*
+        return createBitmap(imageProxy.width, imageProxy.height).also {
+            it.copyPixelsFromBuffer(java.nio.ByteBuffer.wrap(bytes))
+        }
+
+         */
     }
 
     private fun startAutoCapture() {

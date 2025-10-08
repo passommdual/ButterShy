@@ -63,8 +63,9 @@ class MainActivity : AppCompatActivity(), HomeFragment.CameraButtonController {
         initializeDatabase()
 
         val drawerLayout: DrawerLayout = binding.drawerLayout
-        val navView: NavigationView = binding.navView
-        // TODO   val navView = binding.navView
+        //val navView: NavigationView = binding.navView
+        // TODO
+        val navView = binding.navView
         val navController = findNavController(R.id.nav_host_fragment_content_main)
 
 
