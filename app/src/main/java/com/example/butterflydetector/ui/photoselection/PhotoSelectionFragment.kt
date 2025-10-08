@@ -86,18 +86,18 @@ class PhotoSelectionFragment : BaseFragment() {
             try {
                 val selectedIndices = photoSelectionViewModel.selectedPhotos.value ?: emptySet()
                 if (selectedIndices.isNotEmpty()) {
-                    homeViewModel.removePhotosAt(selectedIndices)
+
                     photoSelectionViewModel.clearSelection()
-                    photoAdapter.updatePhotos(homeViewModel.capturedPhotos)
-                    Toast.makeText(requireContext(), "Deleted ${selectedIndices.size} photos", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(requireContext(), "Selection cleared", Toast.LENGTH_SHORT).show()
                 } else {
                     Toast.makeText(requireContext(), "No photos selected", Toast.LENGTH_SHORT).show()
                 }
             } catch (e: Exception) {
                 Log.e("PhotoSelectionFragment", "Error clearing selection", e)
-                Toast.makeText(requireContext(), "Error deleting photos", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), "Error clearing selection", Toast.LENGTH_SHORT).show()
             }
         }
+
 
         binding.sendToAiBtn.setOnClickListener {
             try {
