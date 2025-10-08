@@ -274,6 +274,7 @@ class HomeFragment : BaseFragment() {
         captureRunnable = null
     }
 
+    // <CHANGE> Modified to only add photos with detected butterflies
     private fun capturePhoto() {
         val imageCapture = imageCapture ?: return
         val tempFile = File.createTempFile("photo", ".jpg", requireContext().cacheDir)
@@ -291,7 +292,23 @@ class HomeFragment : BaseFragment() {
                     try {
                         val bitmap = BitmapFactory.decodeFile(tempFile.absolutePath)
                         if (bitmap != null) {
-                            homeViewModel.addPhoto(bitmap)
+                            // <CHANGE> Run butterfly detection on captured photo
+                            lifecycleScope.launch {
+                                try {
+                                    val butterflyDetected = butterflyDetector.detectButterfly(bitmap)
+
+                                    if (butterflyDetected) {
+                                        // Only add photo if butterfly was detected
+                                        homeViewModel.addPhoto(bitmap)
+                                        Log.d(TAG, "[v0] Butterfly detected in captured photo - added to collection")
+                                    } else {
+                                        Log.d(TAG, "[v0] No butterfly detected in captured photo - discarded")
+                                    }
+                                } catch (e: Exception) {
+                                    Log.e(TAG, "Error detecting butterfly in captured photo", e)
+                                    // On error, don't add the photo to be safe
+                                }
+                            }
                         }
                         tempFile.delete()
                     } catch (e: Exception) {

@@ -36,7 +36,6 @@ class PhotoSelectionFragment : BaseFragment() {
         _binding = FragmentPhotoselectionBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
-        // <CHANGE> Initialize ViewModels with proper error handling
         try {
             homeViewModel = ViewModelProvider(requireActivity())[HomeViewModel::class.java]
             photoSelectionViewModel = ViewModelProvider(this)[PhotoSelectionViewModel::class.java]
@@ -134,10 +133,11 @@ class PhotoSelectionFragment : BaseFragment() {
 
             photoAdapter.updatePhotos(photos)
 
+            // <CHANGE> Updated message to reflect butterfly-only filtering
             binding.textGallery.text = if (count > 0) {
-                "Recently captured photos ($count)"
+                "Photos with butterflies detected ($count)"
             } else {
-                "No photos captured yet. Press the camera button to start taking photos."
+                "No butterfly photos captured yet. Press the camera button to start."
             }
         }
 
