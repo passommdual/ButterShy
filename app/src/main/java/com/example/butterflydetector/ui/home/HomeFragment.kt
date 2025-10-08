@@ -33,7 +33,6 @@ import androidx.core.graphics.createBitmap
 
 class HomeFragment : BaseFragment() {
 
-    // Interface für MainActivity, um CameraButton zu steuern
     interface CameraButtonController {
         fun setCameraButtonIcon(isCapturing: Boolean)
     }
@@ -66,11 +65,11 @@ class HomeFragment : BaseFragment() {
 
     private val detectionHistory = ArrayDeque<Boolean>()
 
-    // -------------------- Fragment Lifecycle --------------------
-
     override fun onAttach(context: Context) {
         super.onAttach(context)
-        if (context is CameraButtonController) cameraButtonController = context
+        if (context is CameraButtonController) {
+            cameraButtonController = context
+        }
     }
 
     override fun onDetach() {
@@ -89,7 +88,6 @@ class HomeFragment : BaseFragment() {
 
         butterflyDetector = ButterflyDetector.getInstance(requireContext())
 
-        // Modell initialisieren
         lifecycleScope.launch {
             val initialized = butterflyDetector.initialize()
             if (initialized) {
@@ -107,46 +105,28 @@ class HomeFragment : BaseFragment() {
             }
         }
 
-        // ViewModel Observer
+        homeViewModel.text.observe(viewLifecycleOwner) {
+            binding.statusText.text = it
+        }
 
-        homeViewModel.text.observe(viewLifecycleOwner) { binding.statusText.text = it }
         homeViewModel.photoCount.observe(viewLifecycleOwner) { count ->
             binding.photoCountText.text = "Photos captured: $count"
         }
+
         homeViewModel.detectionStatus.observe(viewLifecycleOwner) { status ->
             binding.detectionStatusText.text = status
         }
-        homeViewModel.isCapturing.observe(viewLifecycleOwner) { isCapturing ->
-            if (isCapturing && !isAutoCapturing) startAutoCapture()
-            else if (!isCapturing && isAutoCapturing) stopAutoCapture()
-        }
-
-        // TODO
-        /*
-        homeViewModel.text.observe(viewLifecycleOwner) { binding.statusText.text = it }
-        homeViewModel.photoCount.observe(viewLifecycleOwner) {
-            binding.photoCountText.text = "Photos captured: $it"
-        }
-        homeViewModel.detectionStatus.observe(viewLifecycleOwner) { binding.detectionStatusText.text = it }
 
         cameraExecutor = Executors.newSingleThreadExecutor()
         return root
-
-         */
-
-        cameraExecutor = Executors.newSingleThreadExecutor()
-        return root
-
     }
 
     override fun applyColorMode(view: View) {
         super.applyColorMode(view)
 
-        // Apply background color to status container
         val statusContainer = view.findViewById<LinearLayout>(R.id.status_container)
         statusContainer?.setBackgroundColor(getLogoGreen())
 
-        // Apply background color to detection status and photo count text views
         val detectionStatusText = view.findViewById<TextView>(R.id.detection_status_text)
         val photoCountText = view.findViewById<TextView>(R.id.photo_count_text)
 
@@ -157,64 +137,79 @@ class HomeFragment : BaseFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Kamera starten
-        if (allPermissionsGranted()) startCamera()
-        else ActivityCompat.requestPermissions(
-            requireActivity(), REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS
-        )
-
-        // Observer für Auto-Capture & Icon
-        homeViewModel.isCapturing.observe(viewLifecycleOwner) { isCapturing ->
-            if (isVisible) cameraButtonController?.setCameraButtonIcon(isCapturing)
-
-            if (isCapturing && !isAutoCapturing) startAutoCapture()
-            else if (!isCapturing && isAutoCapturing) stopAutoCapture()
+        if (allPermissionsGranted()) {
+            startCamera()
+        } else {
+            ActivityCompat.requestPermissions(
+                requireActivity(),
+                REQUIRED_PERMISSIONS,
+                REQUEST_CODE_PERMISSIONS
+            )
         }
 
+        homeViewModel.isCapturing.observe(viewLifecycleOwner) { isCapturing ->
+            if (isVisible) {
+                cameraButtonController?.setCameraButtonIcon(isCapturing)
+            }
 
+            if (isCapturing && !isAutoCapturing) {
+                startAutoCapture()
+            } else if (!isCapturing && isAutoCapturing) {
+                stopAutoCapture()
+            }
+        }
     }
 
     override fun onResume() {
         super.onResume()
-        if (allPermissionsGranted() && cameraProvider == null) startCamera()
-        if (homeViewModel.isCapturing.value == true && isVisible)
+        if (allPermissionsGranted() && cameraProvider == null) {
+            startCamera()
+        }
+        if (homeViewModel.isCapturing.value == true && isVisible) {
             cameraButtonController?.setCameraButtonIcon(true)
+        }
     }
 
     private fun startCamera() {
         val cameraProviderFuture = ProcessCameraProvider.getInstance(requireContext())
         cameraProviderFuture.addListener({
-            cameraProvider = cameraProviderFuture.get()
-
-            val preview = Preview.Builder().build().also {
-                it.setSurfaceProvider(binding.cameraPreview.surfaceProvider)
-            }
-
-            imageCapture = ImageCapture.Builder()
-                .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
-                .build()
-
-            imageAnalyzer = ImageAnalysis.Builder()
-                .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
-                .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_RGBA_8888)
-                .build()
-
-            imageAnalyzer?.setAnalyzer(cameraExecutor) { imageProxy ->
-                processImageForButterflyDetection(imageProxy)
-            }
-
-            // TODO
-            // imageAnalyzer?.setAnalyzer(cameraExecutor) { processImageForButterflyDetection(it) }
-
-            val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
             try {
+                cameraProvider = cameraProviderFuture.get()
+
+                val preview = Preview.Builder().build().also {
+                    it.setSurfaceProvider(binding.cameraPreview.surfaceProvider)
+                }
+
+                imageCapture = ImageCapture.Builder()
+                    .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
+                    .build()
+
+                imageAnalyzer = ImageAnalysis.Builder()
+                    .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+                    .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_RGBA_8888)
+                    .build()
+
+                imageAnalyzer?.setAnalyzer(cameraExecutor) { imageProxy ->
+                    processImageForButterflyDetection(imageProxy)
+                }
+
+                val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
+
                 cameraProvider?.unbindAll()
                 camera = cameraProvider?.bindToLifecycle(
-                    this, cameraSelector, preview, imageCapture, imageAnalyzer
+                    this,
+                    cameraSelector,
+                    preview,
+                    imageCapture,
+                    imageAnalyzer
                 )
             } catch (exc: Exception) {
                 Log.e(TAG, "Use case binding failed", exc)
-                Toast.makeText(requireContext(), "Camera initialization failed", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    requireContext(),
+                    "Camera initialization failed: ${exc.message}",
+                    Toast.LENGTH_SHORT
+                ).show()
             }
         }, ContextCompat.getMainExecutor(requireContext()))
     }
@@ -224,7 +219,9 @@ class HomeFragment : BaseFragment() {
             val bitmap = imageProxyToBitmap(imageProxy)
             lifecycleScope.launch {
                 try {
-                    if (detectionHistory.size >= HISTORY_SIZE) detectionHistory.removeFirst()
+                    if (detectionHistory.size >= HISTORY_SIZE) {
+                        detectionHistory.removeFirst()
+                    }
                     detectionHistory.addLast(butterflyDetector.detectButterfly(bitmap))
 
                     val positives = detectionHistory.count { it }
@@ -252,19 +249,9 @@ class HomeFragment : BaseFragment() {
         buffer.rewind()
         val bytes = ByteArray(buffer.remaining())
         buffer.get(bytes)
-
         return createBitmap(imageProxy.width, imageProxy.height).also { bitmap ->
             bitmap.copyPixelsFromBuffer(java.nio.ByteBuffer.wrap(bytes))
         }
-
-
-        // TODO
-        /*
-        return createBitmap(imageProxy.width, imageProxy.height).also {
-            it.copyPixelsFromBuffer(java.nio.ByteBuffer.wrap(bytes))
-        }
-
-         */
     }
 
     private fun startAutoCapture() {
@@ -291,7 +278,10 @@ class HomeFragment : BaseFragment() {
         val imageCapture = imageCapture ?: return
         val tempFile = File.createTempFile("photo", ".jpg", requireContext().cacheDir)
         val outputFileOptions = ImageCapture.OutputFileOptions.Builder(tempFile).build()
-        imageCapture.takePicture(outputFileOptions, ContextCompat.getMainExecutor(requireContext()),
+
+        imageCapture.takePicture(
+            outputFileOptions,
+            ContextCompat.getMainExecutor(requireContext()),
             object : ImageCapture.OnImageSavedCallback {
                 override fun onError(exception: ImageCaptureException) {
                     Log.e(TAG, "Photo capture failed: ${exception.message}", exception)
@@ -299,23 +289,26 @@ class HomeFragment : BaseFragment() {
 
                 override fun onImageSaved(output: ImageCapture.OutputFileResults) {
                     try {
-                        val file = output.savedUri?.path?.let { File(it) }
-                        if (file?.exists() == true) {
-                            val bitmap = BitmapFactory.decodeFile(file.absolutePath)
-                            if (bitmap != null) homeViewModel.addPhoto(bitmap)
-                            file.delete()
+                        val bitmap = BitmapFactory.decodeFile(tempFile.absolutePath)
+                        if (bitmap != null) {
+                            homeViewModel.addPhoto(bitmap)
                         }
+                        tempFile.delete()
                     } catch (e: Exception) {
                         Log.e(TAG, "Error processing captured photo", e)
                     }
                 }
-            })
+            }
+        )
     }
 
     fun captureAdditionalPhoto() {
         if (imageCapture != null) {
-            if (homeViewModel.isCapturing.value == true) capturePhoto()
-            else homeViewModel.startCapturing()
+            if (homeViewModel.isCapturing.value == true) {
+                capturePhoto()
+            } else {
+                homeViewModel.startCapturing()
+            }
         }
     }
 
@@ -327,13 +320,20 @@ class HomeFragment : BaseFragment() {
         ContextCompat.checkSelfPermission(requireContext(), it) == PackageManager.PERMISSION_GRANTED
     }
 
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String>,
+        grantResults: IntArray
+    ) {
         if (requestCode == REQUEST_CODE_PERMISSIONS) {
-            if (allPermissionsGranted()) startCamera()
-            else {
-                Toast.makeText(requireContext(), "Permissions not granted", Toast.LENGTH_SHORT).show()
-                requireActivity().finish()
-                // TODO maybe requireActivity().finish() needs to be deleted
+            if (allPermissionsGranted()) {
+                startCamera()
+            } else {
+                Toast.makeText(
+                    requireContext(),
+                    "Camera permissions not granted",
+                    Toast.LENGTH_SHORT
+                ).show()
             }
         }
     }

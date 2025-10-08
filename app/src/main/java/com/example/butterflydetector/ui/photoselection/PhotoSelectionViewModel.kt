@@ -2,7 +2,6 @@ package com.example.butterflydetector.ui.photoselection
 
 import android.app.Application
 import android.graphics.Bitmap
-import android.location.Location
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
@@ -67,8 +66,7 @@ class PhotoSelectionViewModel(application: Application) : AndroidViewModel(appli
                 val photoEntities = mutableListOf<PhotoEntity>()
                 val currentTime = System.currentTimeMillis()
 
-                // Mock location for now (you can implement real GPS later)
-                val mockLatitude = 52.5200 // Berlin coordinates as example
+                val mockLatitude = 52.5200
                 val mockLongitude = 13.4050
 
                 withContext(Dispatchers.IO) {
@@ -76,7 +74,6 @@ class PhotoSelectionViewModel(application: Application) : AndroidViewModel(appli
                         if (index < allPhotos.size) {
                             val bitmap = allPhotos[index]
 
-                            // Save bitmap to internal storage
                             val filename = "photo_${currentTime}_$index.jpg"
                             val file = File(getApplication<Application>().filesDir, filename)
 
@@ -84,7 +81,6 @@ class PhotoSelectionViewModel(application: Application) : AndroidViewModel(appli
                                 bitmap.compress(Bitmap.CompressFormat.JPEG, 90, out)
                             }
 
-                            // Generate hash for the image
                             val imageHash = generateImageHash(bitmap)
 
                             val photoEntity = PhotoEntity(
@@ -92,7 +88,7 @@ class PhotoSelectionViewModel(application: Application) : AndroidViewModel(appli
                                 imagePath = file.absolutePath,
                                 latitude = mockLatitude,
                                 longitude = mockLongitude,
-                                photoTakenTimestamp = currentTime - (selectedIndices.size - selectedIndices.indexOf(index)) * 500, // Approximate when photo was taken
+                                photoTakenTimestamp = currentTime - (selectedIndices.size - selectedIndices.indexOf(index)) * 500,
                                 photoSentTimestamp = currentTime,
                                 userName = "Buttershy"
                             )
@@ -101,7 +97,6 @@ class PhotoSelectionViewModel(application: Application) : AndroidViewModel(appli
                         }
                     }
 
-                    // Insert all photos into database
                     val insertedIds = photoDao.insertPhotos(photoEntities)
                     Log.d("PhotoSelectionViewModel", "[v0] Inserted ${insertedIds.size} photos into database")
                 }
@@ -119,7 +114,6 @@ class PhotoSelectionViewModel(application: Application) : AndroidViewModel(appli
     }
 
     private fun generateImageHash(bitmap: Bitmap): String {
-        // Simple hash generation based on bitmap pixels
         val bytes = bitmap.toString().toByteArray()
         val md = MessageDigest.getInstance("MD5")
         val digest = md.digest(bytes)

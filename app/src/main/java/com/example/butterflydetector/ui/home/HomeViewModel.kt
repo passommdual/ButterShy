@@ -12,13 +12,19 @@ class HomeViewModel : ViewModel() {
     }
     val text: LiveData<String> = _text
 
-    private val _isCapturing = MutableLiveData<Boolean>().apply { value = false }
+    private val _isCapturing = MutableLiveData<Boolean>().apply {
+        value = false
+    }
     val isCapturing: LiveData<Boolean> = _isCapturing
 
-    private val _photoCount = MutableLiveData<Int>().apply { value = 0 }
+    private val _photoCount = MutableLiveData<Int>().apply {
+        value = 0
+    }
     val photoCount: LiveData<Int> = _photoCount
 
-    private val _detectionStatus = MutableLiveData<String>().apply { value = "Detection: Ready" }
+    private val _detectionStatus = MutableLiveData<String>().apply {
+        value = "Detection: Ready"
+    }
     val detectionStatus: LiveData<String> = _detectionStatus
 
     private val _capturedPhotos = mutableListOf<Bitmap>()
@@ -43,8 +49,8 @@ class HomeViewModel : ViewModel() {
         _detectionStatus.value = status
     }
 
-
     fun removePhotosAt(indices: Set<Int>) {
+        // <CHANGE> Sort in descending order to avoid index shifting issues
         indices.sortedDescending().forEach { index ->
             if (index in _capturedPhotos.indices) {
                 _capturedPhotos.removeAt(index)
@@ -52,7 +58,6 @@ class HomeViewModel : ViewModel() {
         }
         _photoCount.value = _capturedPhotos.size
     }
-
 
     override fun onCleared() {
         super.onCleared()

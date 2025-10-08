@@ -11,16 +11,13 @@ import android.widget.CheckBox
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.butterflydetector.R
-import com.example.butterflydetector.data.PhotoDatabase
 import com.example.butterflydetector.databinding.FragmentPhotoselectionBinding
 import com.example.butterflydetector.ui.home.HomeViewModel
 import com.example.butterflydetector.ui.base.BaseFragment
 import com.example.butterflydetector.utils.ColorModeManager
-import kotlinx.coroutines.launch
 
 class PhotoSelectionFragment : BaseFragment() {
 
@@ -39,8 +36,14 @@ class PhotoSelectionFragment : BaseFragment() {
         _binding = FragmentPhotoselectionBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
-        homeViewModel = ViewModelProvider(requireActivity())[HomeViewModel::class.java]
-        photoSelectionViewModel = ViewModelProvider(this)[PhotoSelectionViewModel::class.java]
+        // <CHANGE> Initialize ViewModels with proper error handling
+        try {
+            homeViewModel = ViewModelProvider(requireActivity())[HomeViewModel::class.java]
+            photoSelectionViewModel = ViewModelProvider(this)[PhotoSelectionViewModel::class.java]
+        } catch (e: Exception) {
+            Log.e("PhotoSelectionFragment", "Error initializing ViewModels", e)
+            Toast.makeText(requireContext(), "Error initializing photo selection", Toast.LENGTH_SHORT).show()
+        }
 
         setupRecyclerView()
         setupClickListeners()
@@ -52,14 +55,11 @@ class PhotoSelectionFragment : BaseFragment() {
     override fun applyColorMode(view: View) {
         super.applyColorMode(view)
 
-        // Apply background color to main layout
         view.setBackgroundColor(getBookPages())
 
-        // Apply colors to buttons
         binding.clearSelectionBtn.setBackgroundColor(getLogoGreen())
         binding.sendToAiBtn.setBackgroundColor(getLogoDarkGreen())
 
-        // Update adapter with current color mode
         if (::photoAdapter.isInitialized) {
             photoAdapter.updateColorMode(ColorModeManager.isColorblindMode(requireContext()))
         }
@@ -74,6 +74,7 @@ class PhotoSelectionFragment : BaseFragment() {
             },
             isColorblindMode = ColorModeManager.isColorblindMode(requireContext())
         )
+
         binding.photosRecyclerView.apply {
             layoutManager = GridLayoutManager(requireContext(), 3)
             adapter = photoAdapter
@@ -82,24 +83,40 @@ class PhotoSelectionFragment : BaseFragment() {
 
     private fun setupClickListeners() {
         binding.clearSelectionBtn.setOnClickListener {
-            val selectedIndices = photoSelectionViewModel.selectedPhotos.value ?: emptySet()
-            homeViewModel.removePhotosAt(selectedIndices)    // nur ausgewählte löschen
-            photoSelectionViewModel.clearSelection()         // Auswahl zurücksetzen
-            photoAdapter.updatePhotos(homeViewModel.capturedPhotos) // Adapter aktualisieren
+            try {
+                val selectedIndices = photoSelectionViewModel.selectedPhotos.value ?: emptySet()
+                if (selectedIndices.isNotEmpty()) {
+                    homeViewModel.removePhotosAt(selectedIndices)
+                    photoSelectionViewModel.clearSelection()
+                    photoAdapter.updatePhotos(homeViewModel.capturedPhotos)
+                    Toast.makeText(requireContext(), "Deleted ${selectedIndices.size} photos", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(requireContext(), "No photos selected", Toast.LENGTH_SHORT).show()
+                }
+            } catch (e: Exception) {
+                Log.e("PhotoSelectionFragment", "Error clearing selection", e)
+                Toast.makeText(requireContext(), "Error deleting photos", Toast.LENGTH_SHORT).show()
+            }
         }
 
-
-
         binding.sendToAiBtn.setOnClickListener {
-            val photos = homeViewModel.capturedPhotos
-            photoSelectionViewModel.sendSelectedPhotosToDatabase(photos)
+            try {
+                val photos = homeViewModel.capturedPhotos
+                if (photos.isNotEmpty()) {
+                    photoSelectionViewModel.sendSelectedPhotosToDatabase(photos)
+                } else {
+                    Toast.makeText(requireContext(), "No photos to send", Toast.LENGTH_SHORT).show()
+                }
+            } catch (e: Exception) {
+                Log.e("PhotoSelectionFragment", "Error sending photos to AI", e)
+                Toast.makeText(requireContext(), "Error sending photos", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
     private fun observeData() {
-        // Observe photos from HomeViewModel
         homeViewModel.photoCount.observe(viewLifecycleOwner) { count ->
-            Log.d("PhotoSelectionFragment", "[v0] PhotoSelection observing photo count: $count")
+            Log.d("PhotoSelectionFragment", "[v0] Photo count: $count")
             val photos = homeViewModel.capturedPhotos
             Log.d("PhotoSelectionFragment", "[v0] Actual photos list size: ${photos.size}")
 
@@ -112,7 +129,6 @@ class PhotoSelectionFragment : BaseFragment() {
             }
         }
 
-        // Observe photo selection
         photoSelectionViewModel.selectedPhotos.observe(viewLifecycleOwner) { selectedIndices ->
             val count = selectedIndices.size
             binding.selectionCount.text = "$count photos selected"
@@ -120,9 +136,9 @@ class PhotoSelectionFragment : BaseFragment() {
             photoAdapter.updateSelection(selectedIndices)
         }
 
-        // Observe processing status
         photoSelectionViewModel.isProcessing.observe(viewLifecycleOwner) { isProcessing ->
-            binding.sendToAiBtn.isEnabled = !isProcessing && (photoSelectionViewModel.selectedPhotos.value?.isNotEmpty() == true)
+            val hasSelection = photoSelectionViewModel.selectedPhotos.value?.isNotEmpty() == true
+            binding.sendToAiBtn.isEnabled = !isProcessing && hasSelection
             binding.sendToAiBtn.text = if (isProcessing) "Processing..." else "Send to AI Identification"
         }
 
@@ -134,17 +150,22 @@ class PhotoSelectionFragment : BaseFragment() {
     }
 
     private fun showPhotoZoom(bitmap: Bitmap) {
-        val dialog = Dialog(requireContext(), android.R.style.Theme_Black_NoTitleBar_Fullscreen)
-        val dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_photo_zoom, null)
+        try {
+            val dialog = Dialog(requireContext(), android.R.style.Theme_Black_NoTitleBar_Fullscreen)
+            val dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_photo_zoom, null)
 
-        val zoomedPhoto = dialogView.findViewById<ImageView>(R.id.zoomed_photo)
-        val closeBtn = dialogView.findViewById<View>(R.id.close_zoom_btn)
+            val zoomedPhoto = dialogView.findViewById<ImageView>(R.id.zoomed_photo)
+            val closeBtn = dialogView.findViewById<View>(R.id.close_zoom_btn)
 
-        zoomedPhoto.setImageBitmap(bitmap)
-        closeBtn.setOnClickListener { dialog.dismiss() }
+            zoomedPhoto.setImageBitmap(bitmap)
+            closeBtn.setOnClickListener { dialog.dismiss() }
 
-        dialog.setContentView(dialogView)
-        dialog.show()
+            dialog.setContentView(dialogView)
+            dialog.show()
+        } catch (e: Exception) {
+            Log.e("PhotoSelectionFragment", "Error showing photo zoom", e)
+            Toast.makeText(requireContext(), "Error displaying photo", Toast.LENGTH_SHORT).show()
+        }
     }
 
     override fun onDestroyView() {
@@ -175,6 +196,12 @@ class PhotoAdapter(
 
     override fun onBindViewHolder(holder: PhotoViewHolder, position: Int) {
         Log.d("PhotoAdapter", "[v0] Binding photo at position $position")
+
+        if (position >= photos.size) {
+            Log.e("PhotoAdapter", "Invalid position $position for photos size ${photos.size}")
+            return
+        }
+
         val bitmap = photos[position]
         val isSelected = selectedPhotos.contains(position)
 
@@ -185,7 +212,6 @@ class PhotoAdapter(
 
         if (isSelected) {
             holder.selectionOverlay.visibility = View.VISIBLE
-            // Green overlay for normal mode, blue overlay for colorblind mode
             val overlayColor = if (isColorblindMode) {
                 0x440000FF // Semi-transparent blue
             } else {
@@ -196,7 +222,6 @@ class PhotoAdapter(
             holder.selectionOverlay.visibility = View.GONE
         }
 
-        // Click on image to zoom
         holder.imageView.setOnClickListener {
             onPhotoClick(position, bitmap)
         }
@@ -206,7 +231,6 @@ class PhotoAdapter(
             onPhotoSelectionChanged(position, isChecked)
         }
 
-        // Click on entire item to toggle selection
         holder.itemView.setOnClickListener {
             Log.d("PhotoAdapter", "[v0] Item clicked at position $position")
             holder.checkbox.isChecked = !holder.checkbox.isChecked
@@ -216,7 +240,7 @@ class PhotoAdapter(
     override fun getItemCount() = photos.size
 
     fun updatePhotos(newPhotos: List<Bitmap>) {
-        Log.d("PhotoAdapter", "[v0] PhotoAdapter updating with ${newPhotos.size} photos")
+        Log.d("PhotoAdapter", "[v0] Updating with ${newPhotos.size} photos")
         photos = newPhotos
         notifyDataSetChanged()
     }
