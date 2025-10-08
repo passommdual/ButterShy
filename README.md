@@ -17,9 +17,9 @@ Android App zur Unterstützung der Datensammlung von Schmetterlingssichtungen f�
 ### Manon Richnii--
 
 - Tutorial
-  - Start bei erstmaligem Öffnen der App
-  - Extra Screen, der auch erneut aufrufbar ist
-  - einfacher Text zur Erklärung
+  - Start bei erstmaligem Öffnen der App //TODO
+  - Extra Screen, der auch erneut aufrufbar ist (DONE)
+  - einfacher Text zur Erklärung (DONE, maybe erweitern für Speciescatalog)
 
 ### Pascal
 
@@ -28,7 +28,13 @@ Android App zur Unterstützung der Datensammlung von Schmetterlingssichtungen f�
 - Homescreen Name change DONE
 - Disablen der Zählfunktion/Des Toggles im Homescreen DONE
 - ReadMe aufräumen DONE
+- Inklusionsfeatures DONE
+  - Vorlesefunktion
+  - Farbenblindmodus
 
+### Alle
+- Wirtschaftlichkeitsanalyse
+- Präsentation
 
 ## Features
 
