@@ -37,7 +37,7 @@ class HomeViewModel : ViewModel() {
 
     fun stopCapturing() {
         _isCapturing.value = false
-        _text.value = "Photo capture stopped. ${_photoCount.value} photos captured."
+        _text.value = "Photo capture stopped. Press camera button to start taking photos again"
     }
 
     fun addPhoto(bitmap: Bitmap) {
