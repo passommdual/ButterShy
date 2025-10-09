@@ -35,7 +35,7 @@ Android App zur Unterst√ºtzung der Datensammlung von Schmetterlingssichtungen f√
   - Farbenblindmodus DONE
 
 #### Maybe
-- Nur Schmetterlingsbilder anzeigen
+- Nur Schmetterlingsbilder anzeigen (DONE)
 - pt-Modell ausprobierem (statt onnx)
 - echte fotospeicherung
 - abfrage ob fotos an das backend geschickt werden sollen
