@@ -362,7 +362,7 @@
             android:paddingVertical="12dp"
             android:textSize="18sp"
             app:cornerRadius="24dp"
-            android:backgroundTint="@color/purple_500"
-            android:textColor="@color/white" />
+            android:backgroundTint="@color/logo_green"
+            android:textColor="@color/black" />
     </LinearLayout>
 </ScrollView>
