@@ -112,6 +112,9 @@ class TutorialFragment : BaseFragment(), TextToSpeech.OnInitListener {
         card4?.setCardBackgroundColor(getLogoGreen())
         card5?.setCardBackgroundColor(getLogoGreen())
 
+        val nextButton = view.findViewById<MaterialButton>(R.id.nextButton)
+        nextButton.setBackgroundColor(getLogoGreen())
+
 
         // Apply button colors
         playResumeButton.setBackgroundColor(getLogoDarkGreen())

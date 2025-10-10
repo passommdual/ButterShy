@@ -33,4 +33,8 @@ open class BaseFragment : Fragment() {
     protected fun getBookPages(): Int {
         return ColorModeManager.getBookPages(requireContext())
     }
+
+    protected fun getPurple700(): Int {
+        return ColorModeManager.getPurple700(requireContext())
+    }
 }

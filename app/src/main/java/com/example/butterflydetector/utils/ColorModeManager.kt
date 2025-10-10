@@ -48,4 +48,12 @@ object ColorModeManager {
             ContextCompat.getColor(context, R.color.book_pages)
         }
     }
+
+    fun getPurple700(context: Context): Int {
+        return if (isColorblindMode(context)) {
+            ContextCompat.getColor(context, R.color.purple_700_colorblind)
+        } else {
+            ContextCompat.getColor(context, R.color.purple_700)
+        }
+    }
 }

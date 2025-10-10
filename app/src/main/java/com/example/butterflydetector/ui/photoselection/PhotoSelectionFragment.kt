@@ -1,6 +1,7 @@
 package com.example.butterflydetector.ui.photoselection
 
 import android.app.Dialog
+import android.content.res.ColorStateList
 import android.graphics.Bitmap
 import android.os.Bundle
 import android.util.Log
@@ -56,8 +57,11 @@ class PhotoSelectionFragment : BaseFragment() {
 
         view.setBackgroundColor(getBookPages())
 
-        binding.clearSelectionBtn.setBackgroundColor(getLogoGreen())
-        binding.sendToAiBtn.setBackgroundColor(getLogoDarkGreen())
+        binding.clearSelectionBtn.backgroundTintList =
+            ColorStateList.valueOf(getLogoGreen())
+
+        binding.sendToAiBtn.backgroundTintList =
+            ColorStateList.valueOf(getLogoDarkGreen())
 
         if (::photoAdapter.isInitialized) {
             photoAdapter.updateColorMode(ColorModeManager.isColorblindMode(requireContext()))

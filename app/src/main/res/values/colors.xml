@@ -19,4 +19,5 @@
     <color name="logo_green_colorblind">#cfe2f3</color> <!-- Light blue -->
     <color name="logo_dark_green_colorblind">#1c4587</color> <!-- Dark blue -->
     <color name="book_pages_colorblind">#fff2cc</color> <!-- Light yellow -->
+    <color name="purple_700_colorblind">#2E2A8D</color> <!-- Deep Violet Blue -->
 </resources>
