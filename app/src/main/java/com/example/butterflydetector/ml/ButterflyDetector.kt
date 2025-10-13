@@ -11,6 +11,7 @@ import java.io.FileOutputStream
 import java.io.IOException
 import java.nio.FloatBuffer
 import kotlin.math.exp
+import androidx.core.graphics.scale
 
 class ButterflyDetector private constructor(private val context: Context) {
 
@@ -130,7 +131,7 @@ class ButterflyDetector private constructor(private val context: Context) {
     }
 
     private fun preprocessImage(bitmap: Bitmap): FloatBuffer {
-        val resized = Bitmap.createScaledBitmap(bitmap, INPUT_SIZE, INPUT_SIZE, true)
+        val resized = bitmap.scale(INPUT_SIZE, INPUT_SIZE)
         val buffer = FloatBuffer.allocate(3 * INPUT_SIZE * INPUT_SIZE)
         val pixels = IntArray(INPUT_SIZE * INPUT_SIZE)
         resized.getPixels(pixels, 0, INPUT_SIZE, 0, 0, INPUT_SIZE, INPUT_SIZE)

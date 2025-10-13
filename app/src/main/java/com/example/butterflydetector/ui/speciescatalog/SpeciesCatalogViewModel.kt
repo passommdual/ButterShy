@@ -41,7 +41,6 @@ class SpeciesCatalogViewModel(application: Application) : AndroidViewModel(appli
 
     fun searchAndFilter(query: String, onlyFavorites: Boolean) {
         _filteredButterflies.value = allButterflies.filter { butterfly ->
-            // Search matches either name or species (case-insensitive)
             val searchMatch = if (query.isEmpty()) {
                 true
             } else {
@@ -57,18 +56,10 @@ class SpeciesCatalogViewModel(application: Application) : AndroidViewModel(appli
     }
 
 
-    fun filterButterflies(selectedSpecies: List<String>, onlyFavorites: Boolean) {
-        _filteredButterflies.value = allButterflies.filter { butterfly ->
-            val speciesMatch = selectedSpecies.isEmpty() || butterfly.species in selectedSpecies
-            val favoriteMatch = !onlyFavorites || butterfly.isFavorite
-            speciesMatch && favoriteMatch
-        }
-    }
-
     fun toggleFavorite(butterfly: ButterflyEntity) {
         viewModelScope.launch {
             repository.updateFavorite(butterfly.id, !butterfly.isFavorite)
-            loadButterflies() // refresh list
+            loadButterflies()
         }
     }
 }

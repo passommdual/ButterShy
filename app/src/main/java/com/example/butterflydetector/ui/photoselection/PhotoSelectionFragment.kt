@@ -24,7 +24,6 @@ class PhotoSelectionFragment : BaseFragment() {
 
     private var _binding: FragmentPhotoselectionBinding? = null
     private val binding get() = _binding!!
-
     private lateinit var photoAdapter: PhotoAdapter
     private lateinit var homeViewModel: HomeViewModel
     private lateinit var photoSelectionViewModel: PhotoSelectionViewModel
@@ -137,7 +136,6 @@ class PhotoSelectionFragment : BaseFragment() {
 
             photoAdapter.updatePhotos(photos)
 
-            // <CHANGE> Updated message to reflect butterfly-only filtering
             binding.textGallery.text = if (count > 0) {
                 "Photos with butterflies detected ($count)"
             } else {

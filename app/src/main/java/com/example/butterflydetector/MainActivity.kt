@@ -30,6 +30,7 @@ import org.json.JSONArray
 import java.io.IOException
 import com.google.android.material.navigation.NavigationView
 import com.google.android.material.snackbar.Snackbar
+import androidx.core.content.edit
 
 class MainActivity : AppCompatActivity(), HomeFragment.CameraButtonController {
 
@@ -37,7 +38,6 @@ class MainActivity : AppCompatActivity(), HomeFragment.CameraButtonController {
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var navController: NavController
 
-    // Bottom nav custom views
     private var photoBtn: LinearLayout? = null
     private var cameraBtn: LinearLayout? = null
     private var transectsBtn: LinearLayout? = null
@@ -58,7 +58,6 @@ class MainActivity : AppCompatActivity(), HomeFragment.CameraButtonController {
 
         initializeDatabase()
 
-        // <CHANGE> Fixed navigation setup - removed duplicate code and conflicts
         val drawerLayout: DrawerLayout = binding.drawerLayout
         val navView: NavigationView = binding.navView
         navController = findNavController(R.id.nav_host_fragment_content_main)
@@ -77,24 +76,19 @@ class MainActivity : AppCompatActivity(), HomeFragment.CameraButtonController {
 
         setupActionBarWithNavController(navController, appBarConfiguration)
 
-        // <CHANGE> Use setupWithNavController for automatic navigation - this handles drawer clicks properly
         navView.setupWithNavController(navController)
 
-        // <CHANGE> Setup bottom navigation after layout is ready
         setupBottomNavigation()
 
-        // <CHANGE> Listen for destination changes to update UI and handle camera state
         navController.addOnDestinationChangedListener { _, destination, _ ->
             updateBottomSelection(destination.id)
 
             val homeFragment = getCurrentHomeFragment()
 
-            // Stop capture when navigating away from camera
             if (destination.id != R.id.nav_camera) {
                 homeFragment?.stopPhotoCapture()
             }
 
-            // Start capture when navigating to camera (if pending)
             if (destination.id == R.id.nav_camera && pendingCaptureAfterNavigation) {
                 homeFragment?.captureAdditionalPhoto()
                 pendingCaptureAfterNavigation = false
@@ -102,15 +96,12 @@ class MainActivity : AppCompatActivity(), HomeFragment.CameraButtonController {
         }
     }
 
-    // <CHANGE> Simplified and fixed bottom navigation setup
     private fun setupBottomNavigation() {
-        // Find bottom navigation buttons
         photoBtn = findViewById(R.id.btn_photoselection)
         cameraBtn = findViewById(R.id.btn_camera)
         transectsBtn = findViewById(R.id.btn_transects)
         cameraButtonIcon = findViewById(R.id.btn_camera_icon)
 
-        // Photo selection button
         photoBtn?.setOnClickListener {
             try {
                 getCurrentHomeFragment()?.stopPhotoCapture()
@@ -121,7 +112,6 @@ class MainActivity : AppCompatActivity(), HomeFragment.CameraButtonController {
             }
         }
 
-        // Camera button
         cameraBtn?.setOnClickListener {
             try {
                 val currentDest = navController.currentDestination?.id
@@ -136,7 +126,6 @@ class MainActivity : AppCompatActivity(), HomeFragment.CameraButtonController {
                         }
                     }
                 } else {
-                    // Navigate to camera and start capture
                     pendingCaptureAfterNavigation = true
                     safeNavigate(R.id.nav_camera)
                 }
@@ -146,7 +135,6 @@ class MainActivity : AppCompatActivity(), HomeFragment.CameraButtonController {
             }
         }
 
-        // Transects button
         transectsBtn?.setOnClickListener {
             try {
                 getCurrentHomeFragment()?.stopPhotoCapture()
@@ -165,7 +153,6 @@ class MainActivity : AppCompatActivity(), HomeFragment.CameraButtonController {
         cameraBtn?.alpha = if (isCapturing) 0.5f else 1.0f
     }
 
-    // <CHANGE> Added null safety check for navigation
     private fun safeNavigate(destId: Int) {
         try {
             val current = navController.currentDestination?.id
@@ -228,7 +215,7 @@ class MainActivity : AppCompatActivity(), HomeFragment.CameraButtonController {
                     val database = ButterflyDatabase.getDatabase(applicationContext)
                     database.butterflyDao().insertAll(butterflies)
 
-                    sharedPrefs.edit().putBoolean("isFirstLaunch", false).apply()
+                    sharedPrefs.edit { putBoolean("isFirstLaunch", false) }
 
                     withContext(Dispatchers.Main) {
                         Toast.makeText(

@@ -1,12 +1,9 @@
 package com.example.butterflydetector.data
 
 import android.content.Context
-import kotlinx.coroutines.flow.Flow
 
 class ButterflyRepository(context: Context) {
     private val butterflyDao = ButterflyDatabase.getDatabase(context).butterflyDao()
-
-    fun getAllFlow(): Flow<List<ButterflyEntity>> = butterflyDao.getAllFlow()  // Added Flow method
 
     suspend fun getAll() = butterflyDao.getAll()
 

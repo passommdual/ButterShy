@@ -23,16 +23,12 @@ class TutorialFragment : BaseFragment(), TextToSpeech.OnInitListener {
 
     private var _binding: FragmentTutorialBinding? = null
     private val binding get() = _binding!!
-
     private var textToSpeech: TextToSpeech? = null
     private var isTtsInitialized = false
     private var isReading = false
     private var isPaused = false
-
-    // <CHANGE> Added variables for true pause/resume functionality
     private var tutorialSentences: List<String> = emptyList()
     private var currentSentenceIndex: Int = 0
-
     private lateinit var playResumeButton: MaterialButton
     private lateinit var pauseButton: MaterialButton
     private lateinit var readFromTopButton: MaterialButton
@@ -56,7 +52,6 @@ class TutorialFragment : BaseFragment(), TextToSpeech.OnInitListener {
         // Initialize TextToSpeech
         textToSpeech = TextToSpeech(requireContext(), this)
 
-        // <CHANGE> Setup all three buttons
         playResumeButton = binding.playResumeButton
         pauseButton = binding.pauseButton
         readFromTopButton = binding.readFromTopButton
@@ -81,7 +76,6 @@ class TutorialFragment : BaseFragment(), TextToSpeech.OnInitListener {
             readFromTop()
         }
 
-        // <CHANGE> Set initial button visibility
         updateButtonVisibility()
 
         return root
@@ -135,7 +129,6 @@ class TutorialFragment : BaseFragment(), TextToSpeech.OnInitListener {
                 isTtsInitialized = true
                 Log.d("TTS", "TextToSpeech initialized successfully")
 
-                // <CHANGE> Set up utterance progress listener for sentence-by-sentence reading
                 textToSpeech?.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
                     override fun onStart(utteranceId: String?) {
                         activity?.runOnUiThread {
@@ -281,7 +274,6 @@ class TutorialFragment : BaseFragment(), TextToSpeech.OnInitListener {
         return false
     }
 
-    // <CHANGE> Split text into sentences for true pause/resume functionality
     private fun splitIntoSentences(text: String): List<String> {
         // Split by sentence-ending punctuation, keeping the punctuation
         val sentences = text.split(Regex("(?<=[.!?])\\s+"))
@@ -291,7 +283,6 @@ class TutorialFragment : BaseFragment(), TextToSpeech.OnInitListener {
         return sentences
     }
 
-    // <CHANGE> Speak the current sentence
     private fun speakCurrentSentence() {
         if (currentSentenceIndex < tutorialSentences.size) {
             val sentence = tutorialSentences[currentSentenceIndex]
@@ -321,7 +312,6 @@ class TutorialFragment : BaseFragment(), TextToSpeech.OnInitListener {
             return
         }
 
-        // <CHANGE> Split into sentences and start from beginning
         tutorialSentences = splitIntoSentences(tutorialText)
         currentSentenceIndex = 0
         isPaused = false
@@ -334,7 +324,6 @@ class TutorialFragment : BaseFragment(), TextToSpeech.OnInitListener {
         updateButtonVisibility()
     }
 
-    // <CHANGE> True pause functionality - stops at current sentence
     private fun pauseReading() {
         if (isReading) {
             textToSpeech?.stop()
@@ -345,7 +334,6 @@ class TutorialFragment : BaseFragment(), TextToSpeech.OnInitListener {
         }
     }
 
-    // <CHANGE> True resume functionality - continues from paused position
     private fun resumeReading() {
         if (isPaused && currentSentenceIndex < tutorialSentences.size) {
             isPaused = false
@@ -359,7 +347,6 @@ class TutorialFragment : BaseFragment(), TextToSpeech.OnInitListener {
         }
     }
 
-    // <CHANGE> Read from top functionality - restarts from beginning
     private fun readFromTop() {
         currentSentenceIndex = 0
         isPaused = false
@@ -367,7 +354,6 @@ class TutorialFragment : BaseFragment(), TextToSpeech.OnInitListener {
         Toast.makeText(requireContext(), "Reading from the beginning", Toast.LENGTH_SHORT).show()
     }
 
-    // <CHANGE> Update button visibility based on state
     private fun updateButtonVisibility() {
         when {
             isReading -> {

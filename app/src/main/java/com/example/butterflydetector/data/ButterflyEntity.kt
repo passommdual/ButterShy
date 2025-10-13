@@ -8,7 +8,7 @@ data class ButterflyEntity(
     @PrimaryKey val id: Int,
     val name: String,
     val species: String,
-    val imageFile: String,   // e.g. "butterfly_abaeis_nicippe" (drawable resource name without extension)
+    val imageFile: String,   // "butterfly_abaeis_nicippe" (drawable resource name without extension)
     val description: String,
     val habitat: String,
     val wingspan: String,

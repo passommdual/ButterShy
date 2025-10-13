@@ -5,7 +5,7 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 
-@Database(entities = [ButterflyEntity::class], version = 2, exportSchema = false)  // Updated version to 2 for isFavorite field
+@Database(entities = [ButterflyEntity::class], version = 2, exportSchema = false)
 abstract class ButterflyDatabase : RoomDatabase() {
 
     abstract fun butterflyDao(): ButterflyDao
@@ -21,7 +21,7 @@ abstract class ButterflyDatabase : RoomDatabase() {
                     ButterflyDatabase::class.java,
                     "butterfly_database"
                 )
-                    .fallbackToDestructiveMigration()  // Added fallback for version changes
+                    .fallbackToDestructiveMigration(false)
                     .build()
                 INSTANCE = instance
                 instance

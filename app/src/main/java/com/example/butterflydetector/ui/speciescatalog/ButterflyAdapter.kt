@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.butterflydetector.R
 import com.example.butterflydetector.data.ButterflyEntity
 import com.example.butterflydetector.utils.ColorModeManager
+import androidx.core.graphics.toColorInt
 
 class ButterflyAdapter(
     private val context: Context,
@@ -42,7 +43,7 @@ class ButterflyAdapter(
             val context = itemView.context
             nameTextView.text = butterfly.name
 
-            // Remove file extension if present (e.g., "butterfly_name.jpg" -> "butterfly_name")
+            // Remove file extension if present ("butterfly_name.jpg" -> "butterfly_name")
             val resourceName = butterfly.imageFile.substringBeforeLast(".")
 
             // Get drawable resource ID by name
@@ -53,11 +54,9 @@ class ButterflyAdapter(
             )
 
             if (drawableId != 0) {
-                // Successfully found the drawable resource
                 imageView.setImageResource(drawableId)
                 imageView.alpha = 1f
             } else {
-                // Fallback image if drawable not found
                 imageView.setImageResource(android.R.drawable.ic_menu_gallery)
                 imageView.alpha = 0.5f
                 Log.w(
@@ -74,17 +73,16 @@ class ButterflyAdapter(
             // In colorblind mode, use blue instead of yellow for better visibility
             val favoriteColor = if (butterfly.isFavorite) {
                 if (ColorModeManager.isColorblindMode(context)) {
-                    Color.parseColor("#1c4587") // Dark blue (matches logo_dark_green_colorblind)
+                    "#1c4587".toColorInt() // Dark blue (matches logo_dark_green_colorblind)
                 } else {
-                    Color.parseColor("#FFEB3B") // Yellow
+                    "#FFEB3B".toColorInt() // Yellow
                 }
             } else {
-                Color.parseColor("#AAAAAA") // Grey
+                "#AAAAAA".toColorInt() // Grey
             }
 
             favoriteButton.setColorFilter(favoriteColor)
 
-            // Click listeners
             infoButton.setOnClickListener { onInfoClick(butterfly) }
             favoriteButton.setOnClickListener { onFavoriteClick(butterfly) }
         }

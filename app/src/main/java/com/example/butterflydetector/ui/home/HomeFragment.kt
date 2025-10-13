@@ -177,7 +177,7 @@ class HomeFragment : BaseFragment() {
                 cameraProvider = cameraProviderFuture.get()
 
                 val preview = Preview.Builder().build().also {
-                    it.setSurfaceProvider(binding.cameraPreview.surfaceProvider)
+                    it.surfaceProvider = binding.cameraPreview.surfaceProvider
                 }
 
                 imageCapture = ImageCapture.Builder()
@@ -274,7 +274,6 @@ class HomeFragment : BaseFragment() {
         captureRunnable = null
     }
 
-    // <CHANGE> Modified to only add photos with detected butterflies
     private fun capturePhoto() {
         val imageCapture = imageCapture ?: return
         val tempFile = File.createTempFile("photo", ".jpg", requireContext().cacheDir)
@@ -292,7 +291,6 @@ class HomeFragment : BaseFragment() {
                     try {
                         val bitmap = BitmapFactory.decodeFile(tempFile.absolutePath)
                         if (bitmap != null) {
-                            // <CHANGE> Run butterfly detection on captured photo
                             lifecycleScope.launch {
                                 try {
                                     val butterflyDetected = butterflyDetector.detectButterfly(bitmap)

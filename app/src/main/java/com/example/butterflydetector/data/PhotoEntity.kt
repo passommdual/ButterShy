@@ -7,8 +7,8 @@ import androidx.room.PrimaryKey
 data class PhotoEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
-    val imageHash: String, // Hash of the image for identification
-    val imagePath: String, // Path to stored image file
+    val imageHash: String,
+    val imagePath: String,
     val latitude: Double,
     val longitude: Double,
     val photoTakenTimestamp: Long,

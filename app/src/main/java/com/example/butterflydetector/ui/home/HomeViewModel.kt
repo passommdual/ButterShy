@@ -49,16 +49,6 @@ class HomeViewModel : ViewModel() {
         _detectionStatus.value = status
     }
 
-    fun removePhotosAt(indices: Set<Int>) {
-        // <CHANGE> Sort in descending order to avoid index shifting issues
-        indices.sortedDescending().forEach { index ->
-            if (index in _capturedPhotos.indices) {
-                _capturedPhotos.removeAt(index)
-            }
-        }
-        _photoCount.value = _capturedPhotos.size
-    }
-
     override fun onCleared() {
         super.onCleared()
         _capturedPhotos.clear()

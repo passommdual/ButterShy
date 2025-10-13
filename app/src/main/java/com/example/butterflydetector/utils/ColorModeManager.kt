@@ -3,6 +3,7 @@ package com.example.butterflydetector.utils
 import android.content.Context
 import androidx.core.content.ContextCompat
 import com.example.butterflydetector.R
+import androidx.core.content.edit
 
 object ColorModeManager {
     private const val PREFS_NAME = "ColorModePrefs"
@@ -15,7 +16,7 @@ object ColorModeManager {
 
     fun setColorblindMode(context: Context, enabled: Boolean) {
         val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-        prefs.edit().putBoolean(KEY_COLORBLIND_MODE, enabled).apply()
+        prefs.edit { putBoolean(KEY_COLORBLIND_MODE, enabled) }
     }
 
     fun toggleColorblindMode(context: Context): Boolean {

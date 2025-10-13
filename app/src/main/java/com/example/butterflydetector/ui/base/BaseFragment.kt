@@ -18,8 +18,8 @@ open class BaseFragment : Fragment() {
     }
 
     protected open fun applyColorMode(view: View) {
-        // Override this in child fragments to apply specific colors
-        // This base implementation does nothing, but provides a hook
+        // should be overridden in child fragments
+        // to apply specific colors
     }
 
     protected fun getLogoGreen(): Int {
