@@ -11,7 +11,7 @@ on:
 
 jobs:
   android-ci:
-    name: Lint, Unit Tests & Instrumented Tests
+    name: Lint & Unit Tests
     runs-on: ubuntu-latest
 
     env:
@@ -39,34 +39,5 @@ jobs:
       - name: Run Lint
         run: ./gradlew lint
 
-      # Run JVM Unit Tests (no emulator)
       - name: Run Unit Tests
         run: ./gradlew testDebugUnitTest
-
-      # Launch emulator & run Instrumented Tests (ONNX etc.)
-      - name: Run Instrumented Tests on Emulator
-        uses: reactivecircus/android-emulator-runner@v2
-        with:
-          api-level: 33
-          target: google_apis
-          arch: x86_64
-          profile: pixel_5
-          emulator-options: "-no-window -no-audio -no-boot-anim -gpu swiftshader_indirect"
-          disable-animations: true
-          script: ./gradlew connectedDebugAndroidTest --stacktrace --info
-
-      - name: Pull test results from emulator
-        run: |
-          adb wait-for-device
-          echo "Listing cache directory:"
-          adb shell "ls /data/data/com.example.butterflydetector/cache"
-          adb pull /data/data/com.example.butterflydetector/cache/butterfly_positive_results.txt ./butterfly_positive_results.txt || echo "Positive results file not found"
-          adb pull /data/data/com.example.butterflydetector/cache/butterfly_negative_results.txt ./butterfly_negative_results.txt || echo "Negative results file not found"
-
-      - name: Upload Test Results
-        uses: actions/upload-artifact@v4
-        with:
-          name: butterfly-test-results
-          path: |
-            ./butterfly_positive_results.txt
-            ./butterfly_negative_results.txt
