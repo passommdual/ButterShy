@@ -6,7 +6,7 @@ on:
       - '**'
   pull_request:
     branches:
-      - '**'
+      - 'main'
 
 jobs:
   android-ci:
@@ -56,3 +56,21 @@ jobs:
           arch: x86_64
           profile: pixel_6
           script: ./gradlew connectedAndroidTest
+
+      # Step 8: Pull test result files from emulator
+      - name: Pull test results from emulator
+        run: |
+          adb wait-for-device
+          echo "Listing cache directory:"
+          adb shell "ls /data/data/com.example.butterflydetector/cache"
+          adb pull /data/data/com.example.butterflydetector/cache/butterfly_positive_results.txt ./butterfly_positive_results.txt || echo "Positive results file not found"
+          adb pull /data/data/com.example.butterflydetector/cache/butterfly_negative_results.txt ./butterfly_negative_results.txt || echo "Negative results file not found"
+
+      # Step 9: Upload test results as artifacts
+      - name: Upload Test Results
+        uses: actions/upload-artifact@v3
+        with:
+          name: butterfly-test-results
+          path: |
+            ./butterfly_positive_results.txt
+            ./butterfly_negative_results.txt
