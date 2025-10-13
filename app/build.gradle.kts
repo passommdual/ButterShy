@@ -61,6 +61,7 @@ dependencies {
     implementation(libs.androidx.navigation.fragment.ktx)
     implementation(libs.androidx.navigation.ui.ktx)
     implementation(libs.hilt.android)
+    implementation(libs.core.ktx)
     kapt(libs.hilt.compiler)
 
     implementation(libs.androidx.camera.core)
@@ -75,11 +76,12 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
 
     testImplementation(libs.junit)
+    testImplementation("org.robolectric:robolectric:4.16")
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 }
 
-// Optional: Make sure Gradle knows to use the wrapper version (for CI)
+// tell Gradle to use the wrapper version (for CI)
 tasks.withType<Wrapper> {
     gradleVersion = "8.14.3"
 }
