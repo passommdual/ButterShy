@@ -7,6 +7,7 @@ on:
   pull_request:
     branches:
       - 'main'
+  workflow_dispatch:
 
 jobs:
   android-ci:
@@ -17,47 +18,44 @@ jobs:
       ANDROID_SDK_ROOT: ${{ github.workspace }}/android-sdk
 
     steps:
-      # Step 1: Checkout
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # Step 2: JDK 21
       - name: Set up JDK 21
         uses: actions/setup-java@v3
         with:
           distribution: temurin
           java-version: 21
 
-      # Step 3: Android SDK
       - name: Set up Android SDK
         uses: android-actions/setup-android@v2
         with:
           api-level: 33
           build-tools: 33.0.2
 
-      # Step 4: Gradle permissions
       - name: Make Gradle Wrapper executable
         run: chmod +x ./gradlew
 
-      # Step 5: Run Lint
       - name: Run Lint
         run: ./gradlew lint
 
-      # Step 6: Run JVM Unit Tests (no emulator)
+      # Run JVM Unit Tests (no emulator)
       - name: Run Unit Tests
         run: ./gradlew testDebugUnitTest
 
-      # Step 7: Launch emulator & run Instrumented Tests (ONNX etc.)
+      # Launch emulator & run Instrumented Tests (ONNX etc.)
       - name: Run Instrumented Tests on Emulator
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 33
           target: google_apis
           arch: x86_64
-          profile: pixel_6
-          script: ./gradlew connectedAndroidTest
+          profile: pixel_5
+          emulator-options: "-no-window -no-audio -no-boot-anim -gpu swiftshader_indirect"
+          disable-animations: true
+          script: ./gradlew connectedDebugAndroidTest
 
-      # Step 8: Pull test result files from emulator
+
       - name: Pull test results from emulator
         run: |
           adb wait-for-device
@@ -66,7 +64,6 @@ jobs:
           adb pull /data/data/com.example.butterflydetector/cache/butterfly_positive_results.txt ./butterfly_positive_results.txt || echo "Positive results file not found"
           adb pull /data/data/com.example.butterflydetector/cache/butterfly_negative_results.txt ./butterfly_negative_results.txt || echo "Negative results file not found"
 
-      # Step 9: Upload test results as artifacts
       - name: Upload Test Results
         uses: actions/upload-artifact@v4
         with:
