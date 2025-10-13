@@ -20,7 +20,6 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
@@ -85,6 +84,9 @@ class SpeciesCatalogViewModelTest {
         )
     )
 
+    // setup coroutine dispatcher -> controls asychronous operations
+    // mock application and butterflyrepo
+    // mock repo functions
     @Before
     fun setup() {
         Dispatchers.setMain(testDispatcher)
