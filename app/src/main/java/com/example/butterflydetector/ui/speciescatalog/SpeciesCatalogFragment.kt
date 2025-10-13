@@ -1,6 +1,7 @@
 package com.example.butterflydetector.ui.speciescatalog
 
 import android.app.AlertDialog
+import android.content.res.ColorStateList
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -55,6 +56,55 @@ class SpeciesCatalogFragment : BaseFragment() {
 
         val speciesFilterLayout = view.findViewById<TextInputLayout>(R.id.species_filter_layout)
         speciesFilterLayout?.setBackgroundColor(getLogoGreen())
+
+        val logoDarkGreen = getLogoDarkGreen()
+        val boxStrokeColorStateList = ColorStateList(
+            arrayOf(
+                intArrayOf(android.R.attr.state_focused),
+                intArrayOf(android.R.attr.state_hovered),
+                intArrayOf()
+            ),
+            intArrayOf(
+                logoDarkGreen, // focused state
+                logoDarkGreen, // hovered state
+                logoDarkGreen  // default state
+            )
+        )
+        searchFilterLayout?.setBoxStrokeColorStateList(boxStrokeColorStateList)
+        speciesFilterLayout?.setBoxStrokeColorStateList(boxStrokeColorStateList)
+
+        val logoGreen = getLogoGreen()
+
+        // Chip color state list for checked/unchecked states
+        val chipBackgroundColorStateList = ColorStateList(
+            arrayOf(
+                intArrayOf(android.R.attr.state_checked),
+                intArrayOf()
+            ),
+            intArrayOf(
+                logoDarkGreen, // checked state
+                logoGreen      // unchecked state
+            )
+        )
+
+        val chipStrokeColorStateList = ColorStateList(
+            arrayOf(
+                intArrayOf(android.R.attr.state_checked),
+                intArrayOf()
+            ),
+            intArrayOf(
+                logoDarkGreen, // checked state
+                logoDarkGreen  // unchecked state
+            )
+        )
+
+        binding.favoritesChip.chipBackgroundColor = chipBackgroundColorStateList
+        binding.favoritesChip.chipStrokeColor = chipStrokeColorStateList
+        binding.favoritesChip.chipStrokeWidth = 2f
+
+        binding.clearFilterChip.chipBackgroundColor = ColorStateList.valueOf(logoGreen)
+        binding.clearFilterChip.chipStrokeColor = ColorStateList.valueOf(logoDarkGreen)
+        binding.clearFilterChip.chipStrokeWidth = 2f
     }
 
     private fun setupRecyclerView() {
@@ -134,7 +184,7 @@ class SpeciesCatalogFragment : BaseFragment() {
     }
 
     private fun showButterflyInfo(butterfly: ButterflyEntity) {
-        AlertDialog.Builder(requireContext())
+        val dialog = AlertDialog.Builder(requireContext())
             .setTitle(butterfly.name)
             .setMessage("""
                 Species: ${butterfly.species}
@@ -148,7 +198,12 @@ class SpeciesCatalogFragment : BaseFragment() {
                 Flight Period: ${butterfly.flightPeriod}
             """.trimIndent())
             .setPositiveButton("Close") { dialog, _ -> dialog.dismiss() }
-            .show()
+            .create()
+
+        dialog.show()
+
+        // Apply custom color to dialog button after showing
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE)?.setTextColor(getLogoDarkGreen())
     }
 
     override fun onDestroyView() {

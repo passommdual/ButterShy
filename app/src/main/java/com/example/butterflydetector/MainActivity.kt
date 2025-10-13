@@ -286,14 +286,6 @@ class MainActivity : AppCompatActivity(), HomeFragment.CameraButtonController {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
-            R.id.action_info -> {
-                Snackbar.make(
-                    binding.appBarMain.toolbar,
-                    "Information about Butterfly Detector",
-                    Snackbar.LENGTH_LONG
-                ).setAction("OK", null).show()
-                true
-            }
             R.id.action_settings -> {
                 val newMode = ColorModeManager.toggleColorblindMode(this)
                 val message = if (newMode) {

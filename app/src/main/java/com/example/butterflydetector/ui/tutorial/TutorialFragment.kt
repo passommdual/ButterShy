@@ -12,6 +12,7 @@ import android.widget.ScrollView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.findNavController
 import com.example.butterflydetector.R
 import com.example.butterflydetector.databinding.FragmentTutorialBinding
 import com.example.butterflydetector.ui.base.BaseFragment
@@ -76,6 +77,19 @@ class TutorialFragment : BaseFragment(), TextToSpeech.OnInitListener {
             readFromTop()
         }
 
+        binding.nextButton.setOnClickListener {
+            try {
+                // Stop any ongoing text-to-speech
+                textToSpeech?.stop()
+
+                // Navigate to the home/camera fragment
+                findNavController().navigate(R.id.nav_camera)
+            } catch (e: Exception) {
+                Log.e("TutorialFragment", "Navigation error", e)
+                Toast.makeText(requireContext(), "Navigation failed: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
+        }
+
         updateButtonVisibility()
 
         return root
@@ -113,8 +127,7 @@ class TutorialFragment : BaseFragment(), TextToSpeech.OnInitListener {
         // Apply button colors
         playResumeButton.setBackgroundColor(getLogoDarkGreen())
         pauseButton.setBackgroundColor(getLogoDarkGreen())
-        readFromTopButton.strokeColor = android.content.res.ColorStateList.valueOf(getLogoDarkGreen())
-        readFromTopButton.setTextColor(getLogoDarkGreen())
+        readFromTopButton.setBackgroundColor(getLogoDarkGreen())
     }
 
     override fun onInit(status: Int) {

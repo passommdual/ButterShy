@@ -7,15 +7,14 @@ class ButterflyRepository(context: Context) {
 
     suspend fun getAll() = butterflyDao.getAll()
 
-    suspend fun getBySpecies(species: String) = butterflyDao.getBySpecies(species)  // Renamed from getByFamily
+    suspend fun getBySpecies(species: String) = butterflyDao.getBySpecies(species)
 
     suspend fun searchByName(query: String) = butterflyDao.searchByName(query)
 
-    suspend fun getFavorites() = butterflyDao.getFavorites()  // Added favorites method
+    suspend fun getFavorites() = butterflyDao.getFavorites()
 
-    suspend fun getAllSpecies() = butterflyDao.getAllSpecies()  // Added method to get all species
-
+    suspend fun getAllSpecies() = butterflyDao.getAllSpecies()
     suspend fun insertAll(list: List<ButterflyEntity>) = butterflyDao.insertAll(list)
 
-    suspend fun updateFavorite(id: Int, isFavorite: Boolean) = butterflyDao.updateFavorite(id, isFavorite)  // Added toggle favorite method
+    suspend fun updateFavorite(id: Int, isFavorite: Boolean) = butterflyDao.updateFavorite(id, isFavorite)
 }

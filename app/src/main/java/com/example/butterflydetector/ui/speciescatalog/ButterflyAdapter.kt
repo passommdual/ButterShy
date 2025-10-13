@@ -65,6 +65,9 @@ class ButterflyAdapter(
                 )
             }
 
+            val infoBtnColor = ColorModeManager.getLogoDarkGreen(context)
+            infoButton.setColorFilter(infoBtnColor)
+
             favoriteButton.setImageResource(
                 if (butterfly.isFavorite) android.R.drawable.star_big_on
                 else android.R.drawable.star_big_off

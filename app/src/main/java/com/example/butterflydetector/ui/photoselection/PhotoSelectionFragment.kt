@@ -8,6 +8,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.CheckBox
 import android.widget.ImageView
 import android.widget.Toast
@@ -111,14 +112,20 @@ class PhotoSelectionFragment : BaseFragment() {
                     return@setOnClickListener
                 }
 
-                androidx.appcompat.app.AlertDialog.Builder(requireContext())
+                val dialog = androidx.appcompat.app.AlertDialog.Builder(requireContext())
                     .setTitle("Confirm Upload")
                     .setMessage("Do you really want to send $selectedCount photo(s) to AI Identification?")
                     .setPositiveButton("Yes") { _, _ ->
                         photoSelectionViewModel.sendSelectedPhotosToDatabase(photos)
                     }
                     .setNegativeButton("Cancel", null)
-                    .show()
+                    .create()
+
+                dialog.show()
+
+                // Apply custom colors to dialog buttons after showing
+                dialog.getButton(androidx.appcompat.app.AlertDialog.BUTTON_POSITIVE)?.setTextColor(getLogoDarkGreen())
+                dialog.getButton(androidx.appcompat.app.AlertDialog.BUTTON_NEGATIVE)?.setTextColor(getLogoDarkGreen())
 
             } catch (e: Exception) {
                 Log.e("PhotoSelectionFragment", "Error showing confirmation dialog", e)
@@ -169,9 +176,11 @@ class PhotoSelectionFragment : BaseFragment() {
             val dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_photo_zoom, null)
 
             val zoomedPhoto = dialogView.findViewById<ImageView>(R.id.zoomed_photo)
-            val closeBtn = dialogView.findViewById<View>(R.id.close_zoom_btn)
+            val closeBtn = dialogView.findViewById<Button>(R.id.close_zoom_btn)
 
             zoomedPhoto.setImageBitmap(bitmap)
+
+            closeBtn.backgroundTintList = ColorStateList.valueOf(getLogoDarkGreen())
             closeBtn.setOnClickListener { dialog.dismiss() }
 
             dialog.setContentView(dialogView)
